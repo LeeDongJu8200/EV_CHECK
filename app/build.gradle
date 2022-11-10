@@ -1,6 +1,9 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+
+    // firebase에 필요한 google-services.json 적용
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -32,6 +35,17 @@ android {
 }
 
 dependencies {
+
+    // firebase
+    implementation platform('com.google.firebase:firebase-bom:30.3.1')
+    implementation 'com.google.firebase:firebase-database:20.0.5'
+    implementation 'com.google.firebase:firebase-analytics'
+
+    // firebase auth(인증) 기능 구현용 코드
+    implementation 'com.google.firebase:firebase-auth-ktx:21.0.8'
+
+    // firebase에서 database 사용하기 위한 코드
+    implementation 'com.google.firebase:firebase-database-ktx:20.0.6'
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.5.1'
