@@ -48,6 +48,9 @@ dependencies {
     // firebase에서 database 사용하기 위한 코드
     implementation 'com.google.firebase:firebase-database-ktx:20.0.6'
 
+    // GPS 정보를 가져오기 위한 코드
+    implementation 'com.google.android.gms:play-services-location:21.0.1'
+
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation 'com.google.android.material:material:1.6.1'
