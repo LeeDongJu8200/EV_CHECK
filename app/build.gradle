@@ -37,12 +37,13 @@ android {
 dependencies {
 
     // firebase
-    implementation platform('com.google.firebase:firebase-bom:30.3.1')
-    implementation 'com.google.firebase:firebase-database:20.0.5'
-    implementation 'com.google.firebase:firebase-analytics'
+    implementation platform('com.google.firebase:firebase-bom:31.0.2')
+    implementation 'com.google.firebase:firebase-database-ktx'
+    implementation 'com.google.firebase:firebase-analytics-ktx'
 
     // firebase auth(인증) 기능 구현용 코드
-    implementation 'com.google.firebase:firebase-auth-ktx:21.0.8'
+    implementation 'com.google.firebase:firebase-auth-ktx'
+    implementation 'com.google.android.gms:play-services-auth:20.3.0' // 구글연동기능용 코드
 
     // firebase에서 database 사용하기 위한 코드
     implementation 'com.google.firebase:firebase-database-ktx:20.0.6'
