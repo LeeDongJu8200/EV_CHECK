@@ -21,6 +21,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.skt.tmap.TMapView
 
 class IntroActivity : AppCompatActivity() {
 
@@ -39,6 +40,12 @@ class IntroActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_intro)
+
+        // ------------------------------------------------
+
+
+
+        // ------------------------------------------------
 
         checkPermissionForLocation(this)
 
