@@ -11,75 +11,63 @@ import android.os.Bundle
 import android.os.Looper
 import android.util.Log
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.core.app.FrameMetricsAggregator
+import com.example.ev_check.fragment.MapFragment
 import com.google.android.gms.location.*
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 
 class MainActivity : AppCompatActivity() {
-
-    private var mFusedLocationProviderClient: FusedLocationProviderClient? = null // 현재 위치를 가져오기 위한 변수
-    lateinit var mLastLocation: Location // 위치 값을 가지고 있는 객체
-    internal lateinit var mLocationRequest: LocationRequest // 위치 정보 요청의 매개변수를 저장하는
-
-
-    lateinit var button: Button
-    lateinit var text1: TextView
-    lateinit var text2: TextView
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // -------------------------------------------------------------
 
-        button = findViewById(R.id.button)
-        text1 = findViewById(R.id.text1)
-        text2 = findViewById(R.id.text2)
+        // 변수 선언
+        val bnv = findViewById<BottomNavigationView>(R.id.bnv)
+        val fl = findViewById<FrameLayout>(R.id.fl)
 
+        // -------------------------------------------------------------
 
-        mLocationRequest =  LocationRequest.create().apply {
+        // 처음 실행시 bnv에 MapFragment가 보이도록 설정
+        supportFragmentManager.beginTransaction().replace(
+            R.id.fl, // fragment를 넣을 곳
+            MapFragment()
+        ).commit() // 커밋 필수!!!
 
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        // -------------------------------------------------------------
 
+        // bnv를 클릭했을 때
+        bnv.setOnItemSelectedListener { item ->
+            // item --> 내가 선택한 메뉴 정보
+            when (item.itemId){
+                // item이 어떤 id값을 가지고 있는지 판단!
+                R.id.tab1 -> {
+                    // tab1 선택시
+                    Toast.makeText(this, "첫번째 부분화면", Toast.LENGTH_SHORT).show()
+                    // FrameLayout에 HomeFragment 부여
+                    supportFragmentManager.beginTransaction().replace(
+                        R.id.fl, // fragment를 넣을 곳
+                        MapFragment() // 넣을 fragment
+                    ).commit() // 커밋 필수!!!
+                }
+
+            }
+            // false : event 처리가 끝나지 않았다고 판단
+            // true : event 종료를 감지해서 다른 버튼 클릭 가능
+            true
         }
+        // -------------------------------------------------------------
 
-        // 버튼 이벤트를 통해 현재 위치 찾기
-        button.setOnClickListener {
-            startLocationUpdates()
-        }
 
     }
 
-    private fun startLocationUpdates() {
-
-        //FusedLocationProviderClient의 인스턴스를 생성.
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-            && ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return
-        }
-        // 기기의 위치에 관한 정기 업데이트를 요청하는 메서드 실행
-        // 지정한 루퍼 스레드(Looper.myLooper())에서 콜백(mLocationCallback)으로 위치 업데이트를 요청
-        mFusedLocationProviderClient!!.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper())
-    }
-
-    // 시스템으로 부터 위치 정보를 콜백으로 받음
-    private val mLocationCallback = object : LocationCallback() {
-        override fun onLocationResult(locationResult: LocationResult) {
-            // 시스템에서 받은 location 정보를 onLocationChanged()에 전달
-            locationResult.lastLocation
-            locationResult.lastLocation?.let { onLocationChanged(it) }
-        }
-    }
-
-    // 시스템으로 부터 받은 위치정보를 화면에 갱신해주는 메소드
-    fun onLocationChanged(location: Location) {
-        mLastLocation = location
-        text2.text = "위도 : " + mLastLocation.latitude // 갱신 된 위도
-        text1.text = "경도 : " + mLastLocation.longitude // 갱신 된 경도
-
-    }
 
 }
