@@ -2,26 +2,21 @@ package com.example.ev_check.fragment
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
 import android.location.Location
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.FrameLayout
-import android.widget.TextView
-import androidx.core.app.ActivityCompat
+import android.widget.RelativeLayout
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import com.example.ev_check.R
 import com.google.android.gms.location.*
-import com.skt.tmap.TMapView
-import com.skt.tmap.overlay.TMapMarkerItem
-import kotlinx.coroutines.delay
-import org.w3c.dom.Text
+import net.daum.mf.map.api.MapPOIItem
+import net.daum.mf.map.api.MapPoint
+import net.daum.mf.map.api.MapView
 
 class MapFragment : Fragment() {
 
@@ -33,8 +28,9 @@ class MapFragment : Fragment() {
     // ----------------------------------------------------------
     
     lateinit var btnCurrentLocation: View
-    var lat: Double = 0.0
-    var lon: Double = 0.0
+    var lat: Double = 35.1467267 // 인공사 위치
+    var lon: Double = 126.922157
+
 
     // ----------------------------------------------------------
 
@@ -47,10 +43,13 @@ class MapFragment : Fragment() {
 
         btnCurrentLocation = view.findViewById(R.id.btnCurrentLocation)
 
-        val tmapContainer = view.findViewById<FrameLayout>(R.id.tmapViewContainer)
-        val tmapview = TMapView(requireContext())
-        tmapview.setSKTMapApiKey("l7xx5d7fe0cb13c64ba3847085ce8a7ffbf9")
-        tmapContainer.addView(tmapview)
+
+        val mapView = MapView(requireContext())
+
+        val mapViewContainer = view.findViewById<RelativeLayout>(R.id.mapView)
+        mapViewContainer.addView(mapView)
+
+
 
         startLocationUpdates()
 
@@ -66,35 +65,27 @@ class MapFragment : Fragment() {
 
         // 버튼 이벤트를 통해 현재 위치 찾기 + 마커찍기
         btnCurrentLocation.setOnClickListener {
+            mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(lat,lon), 1, false);
 
-            tmapview.setCenterPoint(lat,lon)
-            tmapview.setZoomLevel(17)
+            val marker = MapPOIItem()
+
+            marker.itemName = "Default Marker"
+            marker.tag = 0
+
+            marker.markerType = MapPOIItem.MarkerType.BluePin // 기본으로 제공하는 BluePin 마커 모양.
+
+            marker.selectedMarkerType =
+                MapPOIItem.MarkerType.RedPin // 마커를 클릭했을때, 기본으로 제공하는 RedPin 마커 모양.
 
 
-            // ----------------------------------------------------------
-            // 마커 테스트용 - 현재 위치까지 카메라 이동은 되나 마커가 찍히지 않음...
-            // *** 에뮬레이터 GPS 동작 X - 케이블 이용해 폰에 연결해서 동작시키면 제대로 작동함
-            // 레퍼런스 자료가 자바 뿐이라 그런것같긴한데...
-            // 참고자료 - 크롬 북마크 - 최종프로젝트
-            
-            // 비트맵 이미지
-            val bitmap =
-                BitmapFactory.decodeResource(
-                    requireActivity().resources,
-                    R.drawable.markerblue
-                )
+            mapView.addPOIItem(marker)
 
-            // 마커 선언, 표시
-            val markerItem1 = TMapMarkerItem()
-            markerItem1.id = "marker1"
-            markerItem1.icon = bitmap
-            markerItem1.setPosition(0.5f, 1.0f)
-            markerItem1.setTMapPoint(lat,lon)
-            markerItem1.name = "현재위치"
-            tmapview.addTMapMarkerItem(markerItem1)
         }
 
         // ----------------------------------------------------------
+
+
+
 
         return view
     }
@@ -123,7 +114,7 @@ class MapFragment : Fragment() {
         mLocationRequest = LocationRequest.create()
         mLocationRequest.run {
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            interval = 60 * 1000
+            interval = 1000 // 갱신주기
         }
 
         mLocationCallback = object: LocationCallback() {
@@ -143,7 +134,6 @@ class MapFragment : Fragment() {
         super.onPause()
         mFusedLocationProviderClient?.removeLocationUpdates(mLocationCallback)
     }
-
 
 
 }
