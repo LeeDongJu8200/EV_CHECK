@@ -32,6 +32,10 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
+    dataBinding {
+        enabled = true
+    }
 }
 
 dependencies {
@@ -63,6 +67,8 @@ dependencies {
     // SDK 추가
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation files('libs/libDaumMapAndroid.jar')
+
+
 
 
 }
