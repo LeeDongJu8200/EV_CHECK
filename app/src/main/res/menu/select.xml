@@ -3,18 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/tab1"
-        android:icon="@android:drawable/ic_menu_mapmode"
+        android:icon="@drawable/navi_evmap"
         android:title="map" />
     <item
         android:id="@+id/tab2"
-        android:icon="@android:drawable/ic_media_play"
-        android:title="board1" />
+        android:icon="@drawable/navi_community"
+        android:title="community" />
     <item
         android:id="@+id/tab3"
-        android:icon="@android:drawable/ic_media_ff"
-        android:title="board2" />
+        android:icon="@drawable/navi_check"
+        android:title="checkboard" />
     <item
         android:id="@+id/tab4"
-        android:icon="@android:drawable/ic_menu_compass"
+        android:icon="@drawable/navi_mypage"
         android:title="mypage" />
 </menu>

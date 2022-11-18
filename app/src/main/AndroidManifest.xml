@@ -2,12 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.ev_check">
-
     <!-- 권한 설정 : 위치정보, 인터넷 -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -20,29 +19,26 @@
         android:theme="@style/Theme.EV_CHECK"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+
         <activity
             android:name=".auth.IntroActivity"
             android:exported="false" />
         <activity
             android:name=".SplashActivity"
             android:exported="true">
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
-
         <activity
             android:name=".MainActivity"
-            android:exported="false">
-
-        </activity>
+            android:exported="false" />
 
         <meta-data
             android:name="com.kakao.sdk.AppKey"
-            android:value="fdb242bfeac083d2a9e5f5e2eb9b4244"/>
-
+            android:value="fdb242bfeac083d2a9e5f5e2eb9b4244" />
     </application>
 
 </manifest>
