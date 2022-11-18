@@ -61,8 +61,8 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
     // SDK 추가
-    implementation files('libs/vsm-tmap-sdk-v2-android-1.6.60.aar')
-    implementation files('libs/tmap-sdk-1.1.aar')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation files('libs/libDaumMapAndroid.jar')
 
 
 }
