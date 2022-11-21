@@ -1,30 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.sothree.slidinguppanel.SlidingUpPanelLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainFrameLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="bottom"
+    app:umanoOverlay="true"
+    app:umanoPanelHeight="0dp"
     tools:context=".fragment.MapFragment">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/backLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
         <RelativeLayout
-            android:id="@+id/mapView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </LinearLayout>
+            android:id="@+id/mapViewContainer"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.498">
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/btnDirectionTracking"
-        android:layout_width="wrap_content"
+            <Button
+                android:id="@+id/btnDirectionTracking"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginEnd="24dp"
+                android:layout_marginBottom="24dp"
+                android:text="btn" />
+        </RelativeLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/slideLayout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="24dp"
-        android:clickable="true"
-        android:src="@drawable/ic_gps_normal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:background="@drawable/round_surface">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <ImageView
+            android:id="@+id/imageView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/sliding" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.sothree.slidinguppanel.SlidingUpPanelLayout>
