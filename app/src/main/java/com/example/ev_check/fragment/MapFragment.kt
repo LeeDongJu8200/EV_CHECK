@@ -1,6 +1,10 @@
 package com.example.ev_check.fragment
 
 import android.Manifest
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
@@ -10,6 +14,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.RelativeLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -42,6 +47,27 @@ class MapFragment : Fragment() {
     ): View? {
 
         /* ----------- 테스트 영역 (사용 후 삭제) ----------- */
+
+//        // **화면이 켜졌을 때 다시 지도 동작하는 코드 구현, 멘토링 필요
+//        val intentFilter = IntentFilter(Intent.ACTION_SCREEN_OFF)
+//        intentFilter.addAction(Intent.ACTION_SCREEN_ON)
+//        val receiver = object: BroadcastReceiver() {
+//            override fun onReceive(context: Context?, intent: Intent?) {
+//                val action = intent!!.action
+//                Log.d("Test", "receive : $action")
+//
+//                when (action) {
+//                    Intent.ACTION_SCREEN_ON -> {
+//                        // do something
+//                    }
+//                    Intent.ACTION_SCREEN_OFF -> {
+//                        // do something
+//                    }
+//                }
+//            }
+//        }
+
+//        registerReceiver(receiver, intentFilter);
 
         
 
@@ -78,24 +104,24 @@ class MapFragment : Fragment() {
         // btnDirectionTracking 버튼 - 방향 추적기능 On/Off
         btnDirectionTracking.setOnClickListener {
 
+
             if (isCheck){ // 방향 추적 기능이 꺼져 있을 때 (기본값)
                 // 방향 추적기능 켜기
                 mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
                 mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithHeading
-                // *** 오류
-//                mapView.setZoomLevel(1, true); // 줌레벨 변경 이벤트
-//                btnDirectionTracking.setBackgroundColor(Color.parseColor("blue")) // 버튼 이미지 변경 파트
+                mapView.setZoomLevel(1, true) // 줌레벨 변경 이벤트
+                btnDirectionTracking.setBackgroundResource(R.drawable.ic_gps_clicked) // **버튼 이미지 변경 이벤트, 멘토링 필요
 
             }else{
                 mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
                 mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithMarkerHeadingWithoutMapMoving
-//                mapView.setZoomLevel(1, true);
-//                btnDirectionTracking.setBackgroundColor(Color.parseColor("gray"))
+                mapView.setZoomLevel(1, true)
+                btnDirectionTracking.setBackgroundResource(R.drawable.ic_gps_normal)
+
             }
 
             // 토글 전환
             isCheck = !isCheck
-
 
 
             // 기능 테스트용 임시 코드 - 마커 세팅

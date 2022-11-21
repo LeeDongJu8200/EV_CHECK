@@ -27,6 +27,8 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
 
+/* ----------- 현재 IntroActivity는 사용되지 않음, 추후 회원가입 및 로그인용으로 전환 ----------- */
+
 class IntroActivity : AppCompatActivity() {
 
     /* ----------- 전역변수 선언 영역 ----------- */
@@ -43,7 +45,8 @@ class IntroActivity : AppCompatActivity() {
     // 필요 권한 모음 배열
     var permission_list = arrayOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.ACCESS_COARSE_LOCATION
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_BACKGROUND_LOCATION
     )
 
     val PERMISSIONS_REQUEST = 0x0000001
@@ -161,6 +164,9 @@ class IntroActivity : AppCompatActivity() {
             ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(
@@ -215,6 +221,7 @@ class IntroActivity : AppCompatActivity() {
 
 
     /* ----------- 테스트 영역 (완성 후 삭제) ----------- */
+
 //    // 위치 권한이 있는지 확인하는 메서드
 //    private fun checkPermissionForLocation(context: Context): Boolean {
 //        // Android 6.0 Marshmallow 이상에서는 위치 권한에 추가 런타임 권한이 필요

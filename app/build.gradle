@@ -68,7 +68,6 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation files('libs/libDaumMapAndroid.jar')
 
-
-
+    implementation 'com.github.hannesa2:AndroidSlidingUpPanel:4.2.1'
 
 }
