@@ -54,10 +54,10 @@ class MainActivity : AppCompatActivity() {
         // bnv(네비게이션 뷰) 클릭 이벤트
         bnv.setOnItemSelectedListener { item ->
             // item --> 내가 선택한 메뉴 정보
-            when (item.itemId){
+            when (item.itemId){ // ** 현재 tab1을 중복 클릭시 프로그램이 깨지는 현상 있음, 멘토링 필요
                 // item이 어떤 id값을 가지고 있는지 판단!
                 R.id.tab1 -> {
-                    // tab1 선택시
+                    // tab1 선택시,
                     Toast.makeText(this, "첫번째 부분화면", Toast.LENGTH_SHORT).show()
                     // FrameLayout에 HomeFragment 부여
                     supportFragmentManager.beginTransaction().replace(
