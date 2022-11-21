@@ -29,14 +29,12 @@ import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
 
+    /* ----------- 전역변수 선언 영역 ----------- */
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        /* ----------- 테스트 영역 (사용 후 삭제) ----------- */
-
-
 
         /* ----------- 변수 선언 및 초기화 영역 ----------- */
 
@@ -85,6 +83,8 @@ class MainActivity : AppCompatActivity() {
 
         /* ----------- 기타 영역 ----------- */
 
+
+        /* ----------- 테스트 영역 (사용 후 삭제) ----------- */
 
     }
 
