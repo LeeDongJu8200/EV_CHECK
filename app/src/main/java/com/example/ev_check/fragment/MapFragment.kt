@@ -1,17 +1,13 @@
 package com.example.ev_check.fragment
 
-import android.Manifest
-import android.content.pm.PackageManager
 import android.location.Location
+import android.os.Build
 import android.os.Bundle
-import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import com.example.ev_check.databinding.FragmentMapBinding
 import com.google.android.gms.location.*
@@ -19,6 +15,19 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import net.daum.mf.map.api.MapPOIItem
 import net.daum.mf.map.api.MapPoint
 import net.daum.mf.map.api.MapView
+import org.w3c.dom.Document
+import org.w3c.dom.Element
+import org.w3c.dom.Node
+import org.w3c.dom.NodeList
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
+import java.net.HttpURLConnection
+import java.net.URL
+import java.net.URLEncoder
+import javax.xml.parsers.DocumentBuilderFactory
+
+var text = ""
 
 class MapFragment : Fragment() {
 
@@ -70,35 +79,35 @@ class MapFragment : Fragment() {
 //        startLocationUpdates()
         
         // 앱 시작과 동시에 초기위치로 카메라 이동 + 줌인
-         mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(lat,lon),1,false)
+        mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(lat,lon),1,false)
 
-        // 방향추적 기능 없이 마커만 표시
-        mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithMarkerHeadingWithoutMapMoving
+        // 방향추적 기능 없이 마커만 표시 **멘토링필요!
+        mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading
 
         /* ----------- 이벤트 영역 ----------- */
 
         // btnDirectionTracking : 방향추적 버튼
-        binding.btnDirectionTracking.setOnClickListener {
-
-            if (isCheck){ // 방향 추적 기능이 꺼져 있을 때 (기본값)
-                // 방향 추적기능 켜기
-                mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
-                mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithHeading
-                mapView.setZoomLevel(1, true) // 줌레벨 변경 이벤트
-                // binding.btnDirectionTracking.setBackgroundResource(R.drawable.ic_gps_clicked) // **버튼 이미지 변경 이벤트, 멘토링 필요
-
-            }else{
-                mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
-                mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithMarkerHeadingWithoutMapMoving
-                mapView.setZoomLevel(1, true)
-                // binding.btnDirectionTracking.setBackgroundResource(R.drawable.ic_gps_normal)
-
-            }
-
-            // 토글 전환
-            isCheck = !isCheck
-
-        }
+//        binding.btnDirectionTracking.setOnClickListener {
+//
+//            if (isCheck){ // 방향 추적 기능이 꺼져 있을 때 (기본값)
+//                // 방향 추적기능 켜기
+//                mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
+//                mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithHeading
+//                mapView.setZoomLevel(1, true) // 줌레벨 변경 이벤트
+//                // binding.btnDirectionTracking.setBackgroundResource(R.drawable.ic_gps_clicked) // **버튼 이미지 변경 이벤트, 멘토링 필요
+//
+//            }else{
+//                mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
+//                mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithMarkerHeadingWithoutMapMoving
+//                mapView.setZoomLevel(1, true)
+//                // binding.btnDirectionTracking.setBackgroundResource(R.drawable.ic_gps_normal)
+//
+//            }
+//
+//            // 토글 전환
+//            isCheck = !isCheck
+//
+//        }
 
         /* ----------- 기타 영역 ----------- */
 
@@ -144,9 +153,113 @@ class MapFragment : Fragment() {
         mapView.addPOIItem(marker)
 
 
+        // key값
+        val key = "2680%2Bqf3cT4Io2pS%2BAP7WbASYKfnMEzIWIqJZpszpKjbA%2FSNZ9HbeR8Z40kl24TH4qAGbl4XnWt1xPqeM3Qylw%3D%3D"
+
+        // 현재 페이지번호
+        val pageNo = "&pageNo=1"
+
+        // 한 페이지 결과 수
+        val numOfRows ="&numOfRows=10"
+
+        // 생태기간 갱신
+        val period = "&period=5"
+
+        // 지역구분코드
+        val zcode = "&zcode=29"
+
+        val url = "http://apis.data.go.kr/B552584/EvCharger/getChargerInfo?serviceKey="+key+pageNo+numOfRows+period+zcode
+        Log.d("TTT", url)
+
+        // 버튼을 누르면 쓰레드 동작
+        binding.btnDirectionTracking.setOnClickListener {
+
+            val slidePanel = binding.mainFrameLayout
+            val state = slidePanel.panelState
+
+            if (state == SlidingUpPanelLayout.PanelState.COLLAPSED) {
+                slidePanel.panelState = SlidingUpPanelLayout.PanelState.ANCHORED
+            }
+            // 열린 상태일 경우 닫기
+            else if (state == SlidingUpPanelLayout.PanelState.EXPANDED) {
+                slidePanel.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
+            }
+
+            // 쓰레드 생성
+            val thread = Thread(NetworkThread(url))
+            thread.start() // 쓰레드 시작
+            thread.join() // 멀티 작업 안되게 하려면 start 후 join 입력
+
+            // 쓰레드에서 가져온 api 정보 텍스트에 뿌려주기
+            binding.tvAPI.text = text
+
+        }
+
+
+
+
         /* ----------- View 리턴 ----------- */
 
         return view
+    }
+
+    class NetworkThread(var url: String): Runnable {
+
+        @RequiresApi(Build.VERSION_CODES.N)
+        override fun run() {
+            try {
+                val xml : Document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(url)
+
+                xml.documentElement.normalize()
+
+                //찾고자 하는 데이터가 어느 노드 아래에 있는지 확인
+                val list: NodeList = xml.getElementsByTagName("item")
+
+                //list.length-1 만큼 얻고자 하는 태그의 정보를 가져온다
+                for(i in 0..list.length-1){
+
+                    val n: Node = list.item(i)
+
+                    if(n.getNodeType() == Node.ELEMENT_NODE){
+
+                        val elem = n as Element
+
+                        val map = mutableMapOf<String,String>()
+
+
+                        //
+                        for(j in 0..elem.attributes.length - 1) {
+
+                            map.putIfAbsent(elem.attributes.item(j).nodeName, elem.attributes.item(j).nodeValue)
+
+                        }
+
+
+                        println("=========${i+1}=========")
+                        text += "${i + 1}번 충전소 \n"
+
+                        println("1. 주소 : ${elem.getElementsByTagName("addr").item(0).textContent}")
+                        text += "1. 주소 : ${elem.getElementsByTagName("addr").item(0).textContent} \n"
+
+                        println("2. 이름 : ${elem.getElementsByTagName("statNm").item(0).textContent}")
+                        text += "2. 이름 : ${elem.getElementsByTagName("statNm").item(0).textContent} \n"
+
+                        println("3. 위도 : ${elem.getElementsByTagName("lat").item(0).textContent}")
+                        text += "3. 위도 : ${elem.getElementsByTagName("lat").item(0).textContent} \n"
+
+                        println("4. 경도 : ${elem.getElementsByTagName("lng").item(0).textContent}")
+                        text += "4. 경도 : ${elem.getElementsByTagName("lng").item(0).textContent} \n"
+
+
+                    }
+                }
+
+
+            } catch (e: Exception) {
+                Log.d("TTT", "오픈API"+e.toString())
+            }
+        }
+
     }
 
 
