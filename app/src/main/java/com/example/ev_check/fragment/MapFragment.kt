@@ -67,7 +67,7 @@ class MapFragment : Fragment() {
         binding.mapViewContainer.addView(mapView)
         
         // 실시간 위치 업데이트
-        startLocationUpdates()
+//        startLocationUpdates()
         
         // 앱 시작과 동시에 초기위치로 카메라 이동 + 줌인
          mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(lat,lon),1,false)
@@ -76,20 +76,6 @@ class MapFragment : Fragment() {
         mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithMarkerHeadingWithoutMapMoving
 
         /* ----------- 이벤트 영역 ----------- */
-
-//        // 슬라이딩 패널 관리
-//        binding.btnDirectionTracking.setOnClickListener {
-//            val state = slidePanel.panelState
-//            // 닫힌 상태일 경우 열기
-//            if (state == SlidingUpPanelLayout.PanelState.COLLAPSED) {
-//                slidePanel.panelState = SlidingUpPanelLayout.PanelState.ANCHORED
-//            }
-//            // 열린 상태일 경우 닫기
-//            else if (state == SlidingUpPanelLayout.PanelState.EXPANDED) {
-//                slidePanel.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
-//            }
-//        }
-
 
         // btnDirectionTracking : 방향추적 버튼
         binding.btnDirectionTracking.setOnClickListener {
@@ -111,7 +97,6 @@ class MapFragment : Fragment() {
 
             // 토글 전환
             isCheck = !isCheck
-
 
         }
 
@@ -189,8 +174,18 @@ class MapFragment : Fragment() {
     // 마커 클릭 이벤트 리스너
     class MarkerEventListener(val context: MapFragment): MapView.POIItemEventListener {
         override fun onPOIItemSelected(mapView: MapView?, poiItem: MapPOIItem?) {
+            val slidePanel = context.binding.mainFrameLayout
+            val state = slidePanel.panelState
+
             // 마커 클릭시
-            Log.d("클릭이벤트 확인", "클릭")
+            // 닫힌 상태일 경우 열기
+            if (state == SlidingUpPanelLayout.PanelState.COLLAPSED) {
+                slidePanel.panelState = SlidingUpPanelLayout.PanelState.ANCHORED
+            }
+            // 열린 상태일 경우 닫기
+            else if (state == SlidingUpPanelLayout.PanelState.EXPANDED) {
+                slidePanel.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
+            }
         }
 
         override fun onCalloutBalloonOfPOIItemTouched(mapView: MapView?, poiItem: MapPOIItem?) {
@@ -208,49 +203,48 @@ class MapFragment : Fragment() {
     }
 
 
-    // 실시간 위치 갱신 함수
-    private fun startLocationUpdates() {
-
-        // 권한 체크
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-            && ContextCompat.checkSelfPermission(requireContext(),Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return
-        }
-
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
-
-        mFusedLocationProviderClient!!.lastLocation
-            .addOnSuccessListener { mLastLocation->
-                if(mLastLocation == null) {
-                    Log.e("TAG", "location get fail")
-                } else {
-                    Log.d("TAG", "${mLastLocation.latitude} , ${mLastLocation.longitude}")
-                }
-            }
-            .addOnFailureListener {
-                Log.e("TAG", "location error is ${it.message}")
-                it.printStackTrace()
-            }
-
-        mLocationRequest = LocationRequest.create()
-        mLocationRequest.run {
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            interval = 1000 // 갱신주기
-        }
-
-        mLocationCallback = object: LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult) {
-                locationResult?.let {
-                    for((i, location) in it.locations.withIndex()) {
-                        lat = location.latitude
-                        lon = location.longitude
-                        Log.d("현재좌표", "#$i ${location.latitude} , ${location.longitude}")
-                    }
-                }
-            }
-        }
-        mFusedLocationProviderClient!!.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper())
-    }
+//    // 실시간 위치 갱신 함수
+//    private fun startLocationUpdates() {
+//        // 권한 체크
+//        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+//            && ContextCompat.checkSelfPermission(requireContext(),Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+//            return
+//        }
+//
+//        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
+//
+//        mFusedLocationProviderClient!!.lastLocation
+//            .addOnSuccessListener { mLastLocation->
+//                if(mLastLocation == null) {
+////                    Log.e("TAG", "location get fail")
+//                } else {
+////                    Log.d("TAG", "${mLastLocation.latitude} , ${mLastLocation.longitude}")
+//                }
+//            }
+//            .addOnFailureListener {
+//                Log.e("TAG", "location error is ${it.message}")
+//                it.printStackTrace()
+//            }
+//
+//        mLocationRequest = LocationRequest.create()
+//        mLocationRequest.run {
+//            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+//            interval = 1000 // 갱신주기
+//        }
+//
+//        mLocationCallback = object: LocationCallback() {
+//            override fun onLocationResult(locationResult: LocationResult) {
+//                locationResult?.let {
+//                    for((i, location) in it.locations.withIndex()) {
+//                        lat = location.latitude
+//                        lon = location.longitude
+////                        Log.d("현재좌표", "#$i ${location.latitude} , ${location.longitude}")
+//                    }
+//                }
+//            }
+//        }
+//        mFusedLocationProviderClient!!.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper())
+//    }
 
     // onPause : 다른 Activity 활성화시 호출
    override fun onPause() {
