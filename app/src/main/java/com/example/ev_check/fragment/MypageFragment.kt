@@ -40,7 +40,7 @@ class MypageFragment : Fragment() {
         val pageNo = "&pageNo=1"
 
         // 한 페이지 결과 수
-        val numOfRows ="&numOfRows=10"
+        val numOfRows ="&numOfRows=1"
 
         // 생태기간 갱신
         val period = "&period=5"
@@ -100,22 +100,27 @@ class MypageFragment : Fragment() {
 
                         }
 
+                        text2 += "${i + 1}번 충전기 \n"
+                        text2 += "1. 충전소명 : ${elem.getElementsByTagName("statNm").item(0).textContent} \n"
+                        text2 += "2. 충전소ID : ${elem.getElementsByTagName("statId").item(0).textContent} \n"
+                        text2 += "3. 충전기ID : ${elem.getElementsByTagName("chgerId").item(0).textContent} \n"
+                        text2 += "4. 충전기타입 : ${elem.getElementsByTagName("chgerType").item(0).textContent} \n"
+                        text2 += "5. 소재지주소 : ${elem.getElementsByTagName("addr").item(0).textContent} \n"
+                        text2 += "6. 위도 : ${elem.getElementsByTagName("lat").item(0).textContent} \n"
+                        text2 += "7. 경도 : ${elem.getElementsByTagName("lng").item(0).textContent} \n"
+                        text2 += "8. 이용가능시간 : ${elem.getElementsByTagName("useTime").item(0).textContent} \n"
+                        text2 += "9. 기관ID : ${elem.getElementsByTagName("busiId").item(0).textContent} \n"
+                        text2 += "10. 운영기관명 : ${elem.getElementsByTagName("busiNm").item(0).textContent} \n"
+                        text2 += "11. 관리업체 전화번호 : ${elem.getElementsByTagName("busiCall").item(0).textContent} \n"
+                        text2 += "12. 충전기상태 : ${elem.getElementsByTagName("stat").item(0).textContent} \n"
+                        text2 += "13. 무료주차여부 : ${elem.getElementsByTagName("parkingFree").item(0).textContent} \n"
+                        text2 += "14. 충전소안내 : ${elem.getElementsByTagName("note").item(0).textContent} \n"
 
                         println("=========${i+1}=========")
-                        text2 += "${i + 1}번 충전소 \n"
-
                         println("1. 주소 : ${elem.getElementsByTagName("addr").item(0).textContent}")
-                        text2 += "1. 주소 : ${elem.getElementsByTagName("addr").item(0).textContent} \n"
-
                         println("2. 이름 : ${elem.getElementsByTagName("statNm").item(0).textContent}")
-                        text2 += "2. 이름 : ${elem.getElementsByTagName("statNm").item(0).textContent} \n"
-
                         println("3. 위도 : ${elem.getElementsByTagName("lat").item(0).textContent}")
-                        text2 += "3. 위도 : ${elem.getElementsByTagName("lat").item(0).textContent} \n"
-
                         println("4. 경도 : ${elem.getElementsByTagName("lng").item(0).textContent}")
-                        text2 += "4. 경도 : ${elem.getElementsByTagName("lng").item(0).textContent} \n"
-
 
                     }
                 }
