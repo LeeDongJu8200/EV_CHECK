@@ -9,12 +9,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
+import com.example.ev_check.R
 import com.example.ev_check.databinding.FragmentMapBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import net.daum.mf.map.api.MapPOIItem
 import net.daum.mf.map.api.MapPoint
@@ -68,14 +67,14 @@ class MapFragment : Fragment() {
     lateinit var hashLat : List<String>
     lateinit var hashLng : List<String>
 
-    lateinit var hashChgerType: Collection<List<String>>
-    lateinit var hashStat: Collection<List<String>>
-    lateinit var hashUseTime : Collection<List<String>>
-    lateinit var hashBusiId : Collection<List<String>>
-    lateinit var hashBusiNm : Collection<List<String>>
-    lateinit var hashBusiCall : Collection<List<String>>
-    lateinit var hashParkingFree : Collection<List<String>>
-    lateinit var hashNote : Collection<List<String>>
+//    lateinit var hashChgerType: Collection<List<String>>
+//    lateinit var hashStat: Collection<List<String>>
+//    lateinit var hashUseTime : Collection<List<String>>
+//    lateinit var hashBusiId : Collection<List<String>>
+//    lateinit var hashBusiNm : Collection<List<String>>
+//    lateinit var hashBusiCall : Collection<List<String>>
+//    lateinit var hashParkingFree : Collection<List<String>>
+//    lateinit var hashNote : Collection<List<String>>
 
 
     override fun onCreateView(
@@ -145,14 +144,14 @@ class MapFragment : Fragment() {
         hashLat = lat.distinct()
         hashLng = lng.distinct()
 
-        hashChgerType = chgerType.groupBy { it.split("@")[0] }.values
-        hashStat = stat.groupBy { it.split("@")[0] }.values
-        hashUseTime = useTime.groupBy { it.split("@")[0] }.values
-        hashBusiId = busiId.groupBy { it.split("@")[0] }.values
-        hashBusiNm = busiNm.groupBy { it.split("@")[0] }.values
-        hashBusiCall = busiCall.groupBy { it.split("@")[0] }.values
-        hashParkingFree = parkingFree.groupBy { it.split("@")[0] }.values
-        hashNote = note.groupBy { it.split("@")[0] }.values
+//        hashChgerType = chgerType.groupBy { it.split("@")[0] }.values
+//        hashStat = stat.groupBy { it.split("@")[0] }.values
+//        hashUseTime = useTime.groupBy { it.split("@")[0] }.values
+//        hashBusiId = busiId.groupBy { it.split("@")[0] }.values
+//        hashBusiNm = busiNm.groupBy { it.split("@")[0] }.values
+//        hashBusiCall = busiCall.groupBy { it.split("@")[0] }.values
+//        hashParkingFree = parkingFree.groupBy { it.split("@")[0] }.values
+//        hashNote = note.groupBy { it.split("@")[0] }.values
 
 
         // 마커 표시
@@ -262,6 +261,7 @@ class MapFragment : Fragment() {
 
 
 
+
         
         /* ----------- View 리턴 ----------- */
 
@@ -352,26 +352,79 @@ class MapFragment : Fragment() {
             val slidePanel = context.binding.mainFrameLayout
             val state = slidePanel.panelState
 
-            var mChgerType = chgerType.groupBy { it.split("@")[0] }.values.toTypedArray()[poiItem?.tag!!.toInt()].toMutableList()
+            // 마커 내부에서만 돌아가는 데이터 변수 선언
+            val mChgerType = chgerType.groupBy { it.split("@")[0] }.values.toTypedArray()[poiItem?.tag!!.toInt()].toMutableList() // 충전기 타입, 갯수
+            val mStat = stat.groupBy { it.split("@")[0] }.values.toTypedArray()[poiItem?.tag!!.toInt()].toMutableList() // 충전기 상태
+            val mUseTime = useTime.groupBy { it.split("@")[0] }.values.toTypedArray()[poiItem?.tag!!.toInt()].toMutableList() // 이용 가능 시간
+            val mBusiCall = busiCall.groupBy { it.split("@")[0] }.values.toTypedArray()[poiItem?.tag!!.toInt()].toMutableList() // 관리업체 전화번호
+            val mParkingFree = parkingFree.groupBy { it.split("@")[0] }.values.toTypedArray()[poiItem?.tag!!.toInt()].toMutableList() // 무료주차 가능 여부
+            val mNote = note.groupBy { it.split("@")[0] }.values.toTypedArray()[poiItem?.tag!!.toInt()].toMutableList() // 특이사항
+
+            var dcCombo = false
+            var dcDemo = false
+            var ac3 = false
+            var slow = false
+
+            // 그룹화를 위해 묶었던 'statNm@' 제거
             for (i in 0..mChgerType.size-1){
-                mChgerType[i] = (mChgerType[i].replace(context.hashStatNm.toTypedArray()[poiItem?.tag!!.toInt()]+"@",""))
+                mChgerType[i] = mChgerType[i].replace(context.hashStatNm.toTypedArray()[poiItem?.tag!!.toInt()]+"@","")
+                Log.d("tst", mChgerType[i])
+                mStat[i] = mStat[i].replace(context.hashStatNm.toTypedArray()[poiItem?.tag!!.toInt()]+"@","")
+                mUseTime[i] = mUseTime[i].replace(context.hashStatNm.toTypedArray()[poiItem?.tag!!.toInt()]+"@","")
+                mBusiCall[i] = mBusiCall[i].replace(context.hashStatNm.toTypedArray()[poiItem?.tag!!.toInt()]+"@","")
+                mParkingFree[i] = mParkingFree[i].replace(context.hashStatNm.toTypedArray()[poiItem?.tag!!.toInt()]+"@","")
+                mNote[i] = mNote[i].replace(context.hashStatNm.toTypedArray()[poiItem?.tag!!.toInt()]+"@","")
 
+//                when(mChgerType[i]){
+//                    "01" -> dcDemo = true
+//                    "02" -> slow = true
+//                    "03" -> dcDemo = true
+//                    "03" -> slow = true
+//                    "04" -> dcCombo = true
+//                    "05" -> dcDemo = true
+//                    "05" -> dcCombo = true
+//                    "06" -> dcDemo = true
+//                    "06" -> ac3 = true
+//                    "06" -> dcCombo = true
+//                    "07" -> ac3 = true
+//                }
+
+                if (mChgerType[i] == "01") {
+                    dcDemo = true
+                }else if (mChgerType[i] == "02"){
+                    slow = true
+                }else if (mChgerType[i] == "03"){
+                    dcDemo = true
+                    slow = true
+                }else if (mChgerType[i] == "04"){
+                    dcCombo = true
+                }else if (mChgerType[i] == "05"){
+                    dcCombo = true
+                    dcDemo = true
+                }else if (mChgerType[i] == "06"){
+                    dcDemo = true
+                    ac3 = true
+                    dcCombo = true
+                }else{
+                    ac3 = true
+                }
             }
-
-            Log.d("ttts", mChgerType.toString())
+            Log.d("tst2", dcDemo.toString())
+            Log.d("tst2", dcCombo.toString())
+            Log.d("tst2", ac3.toString())
 
             // 마커 클릭시
-            text = "" // 테스트용 임시 text
-            text += "${poiItem?.tag.toString()}번 충전소 \n"
-            text += "1. 충전소명 : ${poiItem?.itemName.toString()} \n"
-            text += "2. 충전소 주소 : ${context.hashAddr.toTypedArray()[poiItem?.tag!!.toInt()]} \n"
-            text += "3. 충전기 갯수 : ${chgerType.groupBy { it.split("@")[0] }.values.toTypedArray()[poiItem?.tag!!.toInt()].size} \n"
-            text += "4. 충전기 타입 : ${mChgerType} \n"
-            text += "5. 충전기 상태 : ${context.hashStat.toTypedArray()[poiItem?.tag!!.toInt()]} \n"
-            text += "6. 이용가능 시간 : ${context.hashUseTime.toTypedArray()[poiItem?.tag!!.toInt()]} \n"
-            text += "7. 관리업체 전화번호 : ${context.hashBusiCall.toTypedArray()[poiItem?.tag!!.toInt()]} \n"
-            text += "8. 무료주차 여부 : ${context.hashParkingFree.toTypedArray()[poiItem?.tag!!.toInt()]} \n"
-            text += "9. 특이사항 : ${context.hashNote.toTypedArray()[poiItem?.tag!!.toInt()]} \n"
+//            text = "" // 테스트용 임시 text
+//            text += "${poiItem?.tag.toString()}번 충전소 \n"
+//            text += "1. 충전소명 : ${poiItem?.itemName.toString()} \n"
+//            text += "2. 충전소 주소 : ${context.hashAddr.toTypedArray()[poiItem?.tag!!.toInt()]} \n"
+//            text += "3. 충전기 갯수 : ${mChgerType.size} \n"
+//            text += "4. 충전기 타입 : ${mChgerType} \n"
+//            text += "5. 충전기 상태 : ${mStat} \n"
+//            text += "6. 이용가능 시간 : ${mUseTime[0]} \n"
+//            text += "7. 관리업체 전화번호 : ${mBusiCall[0]} \n"
+//            text += "8. 무료주차 여부 : ${mParkingFree[0]} \n"
+//            text += "9. 특이사항 : ${mNote[0]} \n"
 
 
 
@@ -379,7 +432,45 @@ class MapFragment : Fragment() {
             if (state == SlidingUpPanelLayout.PanelState.COLLAPSED) {
                 slidePanel.panelState = SlidingUpPanelLayout.PanelState.ANCHORED
 
-                context.binding.tvAPI.text = text
+                // context.binding.tvAPI.text = text
+
+                context.binding.tvStatNm.text = poiItem?.itemName.toString() // 충전소 이름
+                context.binding.tvAddr.text = context.hashAddr.toTypedArray()[poiItem?.tag!!.toInt()] // 충전소 주소
+
+                if (mUseTime[0] == "24시간 이용가능"){ // 이용가능 시간
+                    context.binding.img24h.setImageResource(R.drawable.slideicon_24_o)
+                } else {
+                    context.binding.img24h.setImageResource(R.drawable.slideicon_24_x)
+                }
+
+                if (mParkingFree[0] == "Y"){ // 무료주차 여부
+                    context.binding.imgParkingFree.setImageResource(R.drawable.slideicon_parkingfree_o)
+                } else {
+                    context.binding.imgParkingFree.setImageResource(R.drawable.slideicon_parkingfree_x)
+                }
+
+                if (dcCombo){
+                    context.binding.imgDcCombo.setImageResource(R.drawable.slideicon_dccombo_o)
+                } else {
+                    context.binding.imgDcCombo.setImageResource(R.drawable.slideicon_dccombo_x)
+                }
+                if (dcDemo){
+                    context.binding.imgDcDemo.setImageResource(R.drawable.slideicon_dcdemo_o)
+                } else {
+                    context.binding.imgDcDemo.setImageResource(R.drawable.slideicon_dcdemo_x)
+                }
+                if (ac3){
+                    context.binding.imgAc3.setImageResource(R.drawable.slideicon_ac3_o)
+                } else {
+                    context.binding.imgAc3.setImageResource(R.drawable.slideicon_ac3_x)
+                }
+                if (slow){
+                    context.binding.imgSlow.setImageResource(R.drawable.slideicon_slow_o)
+                } else {
+                    context.binding.imgSlow.setImageResource(R.drawable.slideicon_slow_x)
+                }
+
+
             }
             // 열린 상태일 경우 닫기
             else if (state == SlidingUpPanelLayout.PanelState.EXPANDED) {
@@ -397,8 +488,8 @@ class MapFragment : Fragment() {
         override fun onCalloutBalloonOfPOIItemTouched(mapView: MapView?, poiItem: MapPOIItem?, buttonType: MapPOIItem.CalloutBalloonButtonType?) {
             // 말풍선 클릭 시
 
-            context.binding.tvAPI.text = text
-            Log.d("APItest", statNm.toString())
+//            context.binding.tvAPI.text = text
+//            Log.d("APItest", statNm.toString())
         }
 
         override fun onDraggablePOIItemMoved(mapView: MapView?, poiItem: MapPOIItem?, mapPoint: MapPoint?) {
