@@ -44,17 +44,142 @@
         android:id="@+id/slideLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/layout_sample_round_border">
+        android:background="@drawable/layout_sample_round_border"
+        android:paddingLeft="8dp"
+        android:paddingTop="16dp"
+        android:paddingRight="8dp"
+        android:paddingBottom="8dp">
 
-        <TextView
-            android:id="@+id/tvAPI"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="0dp"
-            android:layout_height="300dp"
-            android:padding="24dp"
-            android:text="API체크"
-            android:textSize="14sp"
+            android:layout_height="230dp"
+            android:orientation="vertical"
+            android:padding="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/imgChargeable"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/slideicon_charge_o"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tvStatNm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="국민체육센터"
+                android:textColor="@color/black"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="@+id/imgChargeable"
+                app:layout_constraintTop_toBottomOf="@+id/imgChargeable" />
+
+            <TextView
+                android:id="@+id/tvAddr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="광주광역시 동구 필문대로 205번길 17"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="@+id/tvStatNm"
+                app:layout_constraintTop_toBottomOf="@+id/tvStatNm" />
+
+            <ImageView
+                android:id="@+id/btnReport"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/slideicon_report"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/imgDcCombo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/slideicon_dccombo_x"
+                app:layout_constraintBottom_toBottomOf="@+id/imgDcDemo"
+                app:layout_constraintEnd_toStartOf="@+id/imgDcDemo" />
+
+            <ImageView
+                android:id="@+id/imgDcDemo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/slideicon_dcdemo_x"
+                app:layout_constraintBottom_toBottomOf="@+id/imgAc3"
+                app:layout_constraintEnd_toStartOf="@+id/imgAc3" />
+
+            <ImageView
+                android:id="@+id/imgAc3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/slideicon_ac3_x"
+                app:layout_constraintBottom_toBottomOf="@+id/imgSlow"
+                app:layout_constraintEnd_toStartOf="@+id/imgSlow" />
+
+            <ImageView
+                android:id="@+id/imgSlow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/slideicon_slow_x"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <ImageView
+                android:id="@+id/imgParkingFree"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/slideicon_parkingfree_x"
+                app:layout_constraintBottom_toBottomOf="@+id/btnReport"
+                app:layout_constraintEnd_toStartOf="@+id/btnReport"
+                app:layout_constraintTop_toTopOf="@+id/btnReport" />
+
+            <ImageView
+                android:id="@+id/img24h"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/slideicon_24_x"
+                app:layout_constraintBottom_toBottomOf="@+id/btnReport"
+                app:layout_constraintEnd_toStartOf="@+id/imgParkingFree" />
+
+            <ImageView
+                android:id="@+id/btnBookMark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/slideicon_bookmark_x"
+                app:layout_constraintBottom_toBottomOf="@+id/btnReport"
+                app:layout_constraintEnd_toStartOf="@+id/img24h"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tvChargerSize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="X 대 사용가능"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </com.sothree.slidinguppanel.SlidingUpPanelLayout>
