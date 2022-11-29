@@ -7,7 +7,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.core.view.contains
 import androidx.fragment.app.Fragment
 import com.example.ev_check.R
 import com.example.ev_check.databinding.FragmentMapBinding
@@ -61,7 +63,6 @@ class MapFragment : Fragment() {
     var firstlon: Double = 126.922157
 
     // 마커 표시 정보 그룹핑 변수
-
     lateinit var hashStatNm : List<String>
     lateinit var hashAddr : List<String>
     lateinit var hashLat : List<String>
@@ -94,26 +95,31 @@ class MapFragment : Fragment() {
         slidePanel.addPanelSlideListener(PanelEventListener())
 
         // 맵뷰 초기화
+        binding.mapViewContainer.removeAllViews()
         mapView = MapView(requireContext())
+
+        // 맵뷰 이벤트 리스너
         mapView.setPOIItemEventListener(eventListener)
+
 
         // btnDirectionTracking 토글용 boolean 변수
         var isCheck = true
 
 
         /* ----------- 지도 영역 ----------- */
-        
+
         // 카카오지도 표시
         binding.mapViewContainer.addView(mapView)
         
         // 실시간 위치 업데이트
 //        startLocationUpdates()
         
-//        // 앱 시작과 동시에 초기위치로 카메라 이동 + 줌인
-//        mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(firstlat,firstlon),1,false)
+        // 앱 시작과 동시에 초기위치로 카메라 이동 + 줌인
+        mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(firstlat,firstlon),1,false)
 
         // 앱 시작시 위치 추적
-        mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading
+        // 기본값 : 지도 이동 X
+        mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving
 
 
         /* ----------- Rest API 영역 ----------- */
@@ -174,27 +180,35 @@ class MapFragment : Fragment() {
         /* ----------- 이벤트 영역 ----------- */
 
         // btnDirectionTracking : 방향추적 버튼
-//        binding.btnDirectionTracking.setOnClickListener {
-//
-//            if (isCheck){ // 방향 추적 기능이 꺼져 있을 때 (기본값)
-//                // 방향 추적기능 켜기
-//                mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
-//                mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithHeading
-//                mapView.setZoomLevel(1, true) // 줌레벨 변경 이벤트
-//                // binding.btnDirectionTracking.setBackgroundResource(R.drawable.ic_gps_clicked) // **버튼 이미지 변경 이벤트, 멘토링 필요
-//
-//            }else{
-//                mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
-//                mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithMarkerHeadingWithoutMapMoving
-//                mapView.setZoomLevel(1, true)
-//                // binding.btnDirectionTracking.setBackgroundResource(R.drawable.ic_gps_normal)
-//
-//            }
-//
-//            // 토글 전환
-//            isCheck = !isCheck
-//
-//        }
+        binding.btnDirectionTracking.setOnClickListener {
+
+            if (isCheck){ // 기본값 : 맵 고정이 꺼져 있을 때
+                // 방향 추적기능 켜기
+                mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
+                mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading
+                mapView.setZoomLevel(1, true) // 줌레벨 변경 이벤트
+                // binding.btnDirectionTracking.setBackgroundResource(R.drawable.ic_gps_clicked) // **버튼 이미지 변경 이벤트, 멘토링 필요
+
+            }else{
+                mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
+                mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving
+                mapView.setZoomLevel(1, true)
+                // binding.btnDirectionTracking.setBackgroundResource(R.drawable.ic_gps_normal)
+
+            }
+
+            // 토글 전환
+            isCheck = !isCheck
+
+        }
+
+        binding.btnReport.setOnClickListener {
+            Log.d("슬라이드버튼 이벤트1", "고장신고")
+        }
+
+        binding.btnBookMark.setOnClickListener {
+            Log.d("슬라이드버튼 이벤트2", "onCreateView: ")
+        }
 
         /* ----------- 기타 영역 ----------- */
 
@@ -258,8 +272,6 @@ class MapFragment : Fragment() {
 //            Log.d("APItest", statNm.toString())
 //
 //        }
-
-
 
 
         
@@ -360,10 +372,17 @@ class MapFragment : Fragment() {
             val mParkingFree = parkingFree.groupBy { it.split("@")[0] }.values.toTypedArray()[poiItem?.tag!!.toInt()].toMutableList() // 무료주차 가능 여부
             val mNote = note.groupBy { it.split("@")[0] }.values.toTypedArray()[poiItem?.tag!!.toInt()].toMutableList() // 특이사항
 
+            val mLat = context.hashLat[poiItem.tag].toDouble()
+            val mLng = context.hashLng[poiItem.tag].toDouble()
+            mapView?.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(mLat, mLng),true)
+
             var dcCombo = false
             var dcDemo = false
             var ac3 = false
             var slow = false
+
+            var chargeable = false
+            var useableChgr = 0
 
             // 그룹화를 위해 묶었던 'statNm@' 제거
             for (i in 0..mChgerType.size-1){
@@ -375,19 +394,20 @@ class MapFragment : Fragment() {
                 mParkingFree[i] = mParkingFree[i].replace(context.hashStatNm.toTypedArray()[poiItem?.tag!!.toInt()]+"@","")
                 mNote[i] = mNote[i].replace(context.hashStatNm.toTypedArray()[poiItem?.tag!!.toInt()]+"@","")
 
-//                when(mChgerType[i]){
-//                    "01" -> dcDemo = true
-//                    "02" -> slow = true
-//                    "03" -> dcDemo = true
-//                    "03" -> slow = true
-//                    "04" -> dcCombo = true
-//                    "05" -> dcDemo = true
-//                    "05" -> dcCombo = true
-//                    "06" -> dcDemo = true
-//                    "06" -> ac3 = true
-//                    "06" -> dcCombo = true
-//                    "07" -> ac3 = true
-//                }
+                when(mChgerType[i]){
+                    "01" -> dcDemo = true
+                    "02" -> slow = true
+                    "03" -> {dcDemo = true
+                             slow = true}
+                    "03" -> slow = true
+                    "04" -> dcCombo = true
+                    "05" -> dcDemo = true
+                    "05" -> dcCombo = true
+                    "06" -> dcDemo = true
+                    "06" -> ac3 = true
+                    "06" -> dcCombo = true
+                    "07" -> ac3 = true
+                }
 
                 if (mChgerType[i] == "01") {
                     dcDemo = true
@@ -407,6 +427,11 @@ class MapFragment : Fragment() {
                     dcCombo = true
                 }else{
                     ac3 = true
+                }
+
+                if (mStat[i] == "2"){
+                    chargeable = true
+                    useableChgr++
                 }
             }
             Log.d("tst2", dcDemo.toString())
@@ -449,6 +474,7 @@ class MapFragment : Fragment() {
                     context.binding.imgParkingFree.setImageResource(R.drawable.slideicon_parkingfree_x)
                 }
 
+                // 사용가능 충전기 타입
                 if (dcCombo){
                     context.binding.imgDcCombo.setImageResource(R.drawable.slideicon_dccombo_o)
                 } else {
@@ -469,6 +495,14 @@ class MapFragment : Fragment() {
                 } else {
                     context.binding.imgSlow.setImageResource(R.drawable.slideicon_slow_x)
                 }
+
+                // 충전가능 여부 및 사용가능 충전기 댓수
+                if (chargeable){
+                    context.binding.imgChargeable.setImageResource(R.drawable.slideicon_charge_o)
+                } else {
+                    context.binding.imgChargeable.setImageResource(R.drawable.slideicon_charge_x)
+                }
+                context.binding.tvUseableChgr.text = "${useableChgr} 대 사용가능"
 
 
             }
@@ -545,6 +579,9 @@ class MapFragment : Fragment() {
    override fun onPause() {
         super.onPause()
         mFusedLocationProviderClient?.removeLocationUpdates(mLocationCallback)
+        binding.mapViewContainer.removeAllViews()
     }
+
+
 
 }
