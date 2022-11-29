@@ -7,11 +7,16 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.SearchView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.core.view.contains
+import androidx.core.view.isInvisible
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.ev_check.EvStation
+import com.example.ev_check.MainActivity
 import com.example.ev_check.R
+import com.example.ev_check.SearchViewAdapter
 import com.example.ev_check.databinding.FragmentMapBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -45,7 +50,10 @@ var busiCall = mutableListOf<String>() // 관리업체 전화번호
 var parkingFree = mutableListOf<String>() // 주차료무료 여부
 var note = mutableListOf<String>() // 충전소 안내
 
-class MapFragment : Fragment() {
+//뒤로가기 연속 클릭 대기 시간
+var mBackWait:Long = 0
+
+class MapFragment : Fragment(), MainActivity.onBackPressedListener {
 
     /* ----------- 전역변수 선언 영역 ----------- */
 
@@ -58,7 +66,9 @@ class MapFragment : Fragment() {
     internal lateinit var mLocationRequest: LocationRequest // 위치 정보 요청의 매개변수를 저장
     internal lateinit var mLocationCallback: LocationCallback
 
-    // 초기 카메라 이동용 인공사 위치 코드
+    // ** 초기 카메라 이동용 인공사 위치 코드 - 멘토링 필요!!!
+    // 임시로 인공사 위경도값을 직접 받아서 쏘고 있으나 앱 실행과 동시에 위경도 값을 받아오는 방법이 필요함
+    // 현재 아래쪽에 주석처리해 놓은 것들은 실시간 처리는 되는데 앱 실행 1~2초 후 작동.
     var firstlat: Double = 35.1467267
     var firstlon: Double = 126.922157
 
@@ -76,6 +86,10 @@ class MapFragment : Fragment() {
 //    lateinit var hashBusiCall : Collection<List<String>>
 //    lateinit var hashParkingFree : Collection<List<String>>
 //    lateinit var hashNote : Collection<List<String>>
+
+    // 서치뷰 관련 전역변수
+    lateinit var searchViewAdapter: SearchViewAdapter
+    lateinit var evstations: ArrayList<EvStation>
 
 
     override fun onCreateView(
@@ -95,7 +109,7 @@ class MapFragment : Fragment() {
         slidePanel.addPanelSlideListener(PanelEventListener())
 
         // 맵뷰 초기화
-        binding.mapViewContainer.removeAllViews()
+//        binding.mapViewContainer.removeAllViews()
         mapView = MapView(requireContext())
 
         // 맵뷰 이벤트 리스너
@@ -104,6 +118,14 @@ class MapFragment : Fragment() {
 
         // btnDirectionTracking 토글용 boolean 변수
         var isCheck = true
+
+        // 서치뷰, 리사이클러뷰
+        binding.svSearch.bringToFront() // 서치뷰를 지도 위로
+        binding.svView.bringToFront() // 리사이클러뷰를 지도 위로
+        binding.svView.isInvisible = true // 리사이클러뷰가 평소에는 안보이게
+
+        // 서치뷰 텍스트 리스너(검색기능)
+        binding.svSearch.setOnQueryTextListener(searchViewTextListener)
 
 
         /* ----------- 지도 영역 ----------- */
@@ -131,6 +153,8 @@ class MapFragment : Fragment() {
         // 한 페이지 결과 수 (최소 10, 최대 9999)
         val numOfRows ="&numOfRows=10"
         // 지역구분코드(행정구역코드 앞 2자리, 서울 11, 광주 29)
+        // ** 멘토링 필요! 현재 위치 값을 기반으로 지역을 파악하는 방법이 필요함
+        // 위경도 범위로 일일이 하드코딩해서 범위에 따라 지역코드를 분할하는 방법을 고려중인데 더 좋은 방법이 있는지 알고싶음
         val zcode = "&zcode=29"
         // 전체 URL
         val url = "http://apis.data.go.kr/B552584/EvCharger/getChargerInfo?serviceKey="+key+pageNo+numOfRows+zcode
@@ -202,6 +226,7 @@ class MapFragment : Fragment() {
 
         }
 
+        // 슬라이드 버튼 이벤트
         binding.btnReport.setOnClickListener {
             Log.d("슬라이드버튼 이벤트1", "고장신고")
         }
@@ -210,6 +235,13 @@ class MapFragment : Fragment() {
             Log.d("슬라이드버튼 이벤트2", "onCreateView: ")
         }
 
+
+        /* ----------- 리사이클러뷰, 어댑터 영역 ----------- */
+
+        evstations = tempEv()
+        setAdapter()
+
+
         /* ----------- 기타 영역 ----------- */
 
         mLocationRequest =  LocationRequest.create().apply {
@@ -217,6 +249,7 @@ class MapFragment : Fragment() {
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
 
         }
+
 
         /* ----------- 테스트 영역 (사용 후 삭제) ----------- */
 
@@ -273,8 +306,6 @@ class MapFragment : Fragment() {
 //
 //        }
 
-
-        
         /* ----------- View 리턴 ----------- */
 
         return view
@@ -282,6 +313,9 @@ class MapFragment : Fragment() {
 
 
     /* ----------- 함수, 메서드, 리스너, 기타기능 영역 ----------- */
+
+
+    /* ----------- Rest API ----------- */
 
     // Rest API 통신용 Class
     class NetworkThread(var url: String): Runnable {
@@ -340,6 +374,7 @@ class MapFragment : Fragment() {
     }
 
 
+    /* ----------- 슬라이딩 패널 ----------- */
     // 슬라이딩 패널 이벤트 리스너
     inner class PanelEventListener : SlidingUpPanelLayout.PanelSlideListener {
         // 패널이 슬라이드 중일 때
@@ -358,6 +393,7 @@ class MapFragment : Fragment() {
     }
 
 
+    /* ----------- 마커 클릭 ----------- */
     // 마커 클릭 이벤트 리스너
     class MarkerEventListener(val context: MapFragment): MapView.POIItemEventListener {
         override fun onPOIItemSelected(mapView: MapView?, poiItem: MapPOIItem?) {
@@ -372,15 +408,18 @@ class MapFragment : Fragment() {
             val mParkingFree = parkingFree.groupBy { it.split("@")[0] }.values.toTypedArray()[poiItem?.tag!!.toInt()].toMutableList() // 무료주차 가능 여부
             val mNote = note.groupBy { it.split("@")[0] }.values.toTypedArray()[poiItem?.tag!!.toInt()].toMutableList() // 특이사항
 
+            // 지도 중앙 이동용 위경도
             val mLat = context.hashLat[poiItem.tag].toDouble()
             val mLng = context.hashLng[poiItem.tag].toDouble()
             mapView?.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(mLat, mLng),true)
 
+            // 충전기 정보
             var dcCombo = false
             var dcDemo = false
             var ac3 = false
             var slow = false
 
+            // 충전기 사용 가능 여부
             var chargeable = false
             var useableChgr = 0
 
@@ -394,41 +433,28 @@ class MapFragment : Fragment() {
                 mParkingFree[i] = mParkingFree[i].replace(context.hashStatNm.toTypedArray()[poiItem?.tag!!.toInt()]+"@","")
                 mNote[i] = mNote[i].replace(context.hashStatNm.toTypedArray()[poiItem?.tag!!.toInt()]+"@","")
 
+                // 충전기 정보에 따라 이미지뷰 변경
                 when(mChgerType[i]){
                     "01" -> dcDemo = true
                     "02" -> slow = true
-                    "03" -> {dcDemo = true
-                             slow = true}
-                    "03" -> slow = true
+                    "03" -> {
+                        dcDemo = true
+                        slow = true}
                     "04" -> dcCombo = true
-                    "05" -> dcDemo = true
-                    "05" -> dcCombo = true
-                    "06" -> dcDemo = true
-                    "06" -> ac3 = true
-                    "06" -> dcCombo = true
+                    "05" -> {
+                        dcDemo = true
+                        dcCombo = true
+                    }
+                    "06" -> {
+                        dcDemo = true
+                        ac3 = true
+                        dcCombo = true
+                    }
                     "07" -> ac3 = true
                 }
 
-                if (mChgerType[i] == "01") {
-                    dcDemo = true
-                }else if (mChgerType[i] == "02"){
-                    slow = true
-                }else if (mChgerType[i] == "03"){
-                    dcDemo = true
-                    slow = true
-                }else if (mChgerType[i] == "04"){
-                    dcCombo = true
-                }else if (mChgerType[i] == "05"){
-                    dcCombo = true
-                    dcDemo = true
-                }else if (mChgerType[i] == "06"){
-                    dcDemo = true
-                    ac3 = true
-                    dcCombo = true
-                }else{
-                    ac3 = true
-                }
 
+                // 충전기 사용가능 여부 확인
                 if (mStat[i] == "2"){
                     chargeable = true
                     useableChgr++
@@ -506,7 +532,7 @@ class MapFragment : Fragment() {
 
 
             }
-            // 열린 상태일 경우 닫기
+            // 슬라이드 패널 열린 상태일 경우 닫기
             else if (state == SlidingUpPanelLayout.PanelState.EXPANDED) {
                 slidePanel.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
 
@@ -530,6 +556,9 @@ class MapFragment : Fragment() {
             // 마커의 속성 중 isDraggable = true 일 때 마커를 이동시켰을 경우
         }
     }
+
+    //
+
 
 
 //    // 실시간 위치 갱신 함수
@@ -574,6 +603,71 @@ class MapFragment : Fragment() {
 //        }
 //        mFusedLocationProviderClient!!.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper())
 //    }
+
+    /* ----------- 서치뷰 ----------- */
+
+    // 서치뷰 텍스트 리스너
+    var searchViewTextListener: SearchView.OnQueryTextListener =
+        object : SearchView.OnQueryTextListener {
+            //검색버튼 입력시 호출, 검색버튼이 없으므로 사용하지 않음
+            override fun onQueryTextSubmit(s: String): Boolean {
+                return false
+            }
+
+            //텍스트 입력/수정시에 호출
+            override fun onQueryTextChange(s: String): Boolean {
+                binding.svView.isInvisible = false
+                searchViewAdapter.filter.filter(s)
+                Log.d("서치뷰", "SearchVies Text is changed : $s")
+                return false
+            }
+        }
+
+    // 리사이클러뷰에 리사이클러뷰 어댑터 부착
+    fun setAdapter(){
+        binding.svView.layoutManager = LinearLayoutManager(context)
+        searchViewAdapter = SearchViewAdapter(evstations, this)
+        binding.svView.adapter = searchViewAdapter
+    }
+
+    // tempEV에 데이터 가져오기
+    fun tempEv(): ArrayList<EvStation> {
+        var tempEv = ArrayList<EvStation>()
+
+        for (i in 0..hashStatNm.size-1){
+            tempEv.add(EvStation(i, hashStatNm[i], hashAddr[i], hashLat[i], hashLng[i]))
+        }
+
+
+        return tempEv
+    }
+
+    /* ----------- 기타 기능 ----------- */
+
+    // 뒤로가기 버튼
+    override fun onBackPressed() {
+        Log.d("백버튼", "뒤로가기")
+
+        // 서치뷰 텍스트 초기화, 리사이클러뷰 가리기
+        binding.svSearch.setQuery("", false)
+        binding.svView.isInvisible = true
+//        // 슬라이드 패널이 열려 있을 경우 닫는 기능 구현
+//            if (state == SlidingUpPanelLayout.PanelState.EXPANDED) {
+//                slidePanel.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
+//
+//            }
+
+        // 뒤로가기 2번 눌렀을때의 동작
+        if (System.currentTimeMillis() - mBackWait >= 1000){
+            // 1초 기다린 후 1초 안에 뒤로가기 2번 연속 클릭시 종료
+            mBackWait = System.currentTimeMillis()
+            Toast.makeText(context, "뒤로가기 버튼을 한번 더 누르면 종료됩니다.", Toast.LENGTH_SHORT).show()
+
+        } else {
+            // 종료
+            activity?.finish()
+        }
+    }
 
     // onPause : 다른 Activity 활성화시 호출
    override fun onPause() {

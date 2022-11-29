@@ -89,15 +89,10 @@ class MypageFragment : Fragment() {
                     if(n.getNodeType() == Node.ELEMENT_NODE){
 
                         val elem = n as Element
-
                         val map = mutableMapOf<String,String>()
 
-
-                        // 이부분은 어디에 쓰이는지 잘 모르겠다.
                         for(j in 0..elem.attributes.length - 1) {
-
                             map.putIfAbsent(elem.attributes.item(j).nodeName, elem.attributes.item(j).nodeValue)
-
                         }
 
                         text2 += "${i + 1}번 충전기 \n"

@@ -86,9 +86,28 @@ class MainActivity : AppCompatActivity() {
 
         /* ----------- 테스트 영역 (사용 후 삭제) ----------- */
 
+
     }
 
+    // Listener역할을 할 Interface 생성
+    interface onBackPressedListener {
+        fun onBackPressed()
+    }
+
+    override fun onBackPressed(){
+        // 해당 엑티비티에서 띄운 프래그먼트에서 뒤로가기를 누르게 되면 프래그먼트에서 구현한 onBackPressed 함수가 실행
+        val fragmentList = supportFragmentManager.fragments
+        for (fragment in fragmentList) {
+            if (fragment is onBackPressedListener) {
+                (fragment as onBackPressedListener).onBackPressed()
+                return
+            }
+        }
+    }
+
+
     /* ----------- 함수, 메서드, 기타기능 영역 ----------- */
+
 
 
 }
