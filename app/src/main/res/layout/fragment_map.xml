@@ -15,6 +15,16 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <Button
+            android:id="@+id/btnDirectionTracking"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_margin="16dp"
+            android:background="@drawable/layout_sample_rount_button"
+            android:backgroundTint="#03A9F4"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
         <RelativeLayout
             android:id="@+id/mapViewContainer"
             android:layout_width="0dp"
@@ -25,49 +35,28 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.498">
 
-            <Button
-                android:id="@+id/btnDirectionTracking"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentBottom="true"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="24dp"
-                android:layout_marginEnd="24dp"
-                android:layout_marginBottom="24dp"
-                android:background="@drawable/layout_sample_rount_button"
-                android:backgroundTint="#03A9F4" />
         </RelativeLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/slideLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/layout_sample_round_border"
-        android:paddingLeft="8dp"
-        android:paddingTop="16dp"
-        android:paddingRight="8dp"
-        android:paddingBottom="8dp">
+        android:layout_height="match_parent"
+        android:hapticFeedbackEnabled="false">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="0dp"
             android:layout_height="230dp"
+            android:background="@drawable/layout_sample_round_border"
+            android:hapticFeedbackEnabled="false"
             android:orientation="vertical"
             android:padding="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <ImageView
-                android:id="@+id/imgChargeable"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/slideicon_charge_o"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0">
 
             <TextView
                 android:id="@+id/tvStatNm"
@@ -80,6 +69,14 @@
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="@+id/imgChargeable"
                 app:layout_constraintTop_toBottomOf="@+id/imgChargeable" />
+
+            <ImageView
+                android:id="@+id/imgChargeable"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/slideicon_charge_o"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/tvAddr"
@@ -166,7 +163,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/tvChargerSize"
+                android:id="@+id/tvUseableChgr"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
