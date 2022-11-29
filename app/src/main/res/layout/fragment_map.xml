@@ -15,6 +15,33 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <SearchView
+            android:id="@+id/svSearch"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/layout_sample_search_view"
+            android:iconifiedByDefault="false"
+            android:queryHint="충전소명으로 검색"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:showAsAction="always">
+
+        </SearchView>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/svView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            app:layout_constraintEnd_toEndOf="@+id/svSearch"
+            app:layout_constraintStart_toStartOf="@+id/svSearch"
+            app:layout_constraintTop_toBottomOf="@+id/svSearch" />
+
         <Button
             android:id="@+id/btnDirectionTracking"
             android:layout_width="60dp"
