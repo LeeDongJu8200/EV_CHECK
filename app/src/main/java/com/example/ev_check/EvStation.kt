@@ -6,5 +6,6 @@ class EvStation(
     var statNm: String, // 충전소명
     var addr: String, // 충전소 주소
     var lat: String, // 충전소 위도
-    var lng: String // 충전소 경도
+    var lng: String, // 충전소 경도
+    var distance: String // 충전소까지의 거리
 ) {}

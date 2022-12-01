@@ -43,7 +43,7 @@ class SplashActivity : AppCompatActivity() {
         Log.d("권한체크", ""+checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION))
 
         // 권한체크용 임시변수
-        var check = ""+checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+        val check = ""+checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
 
         if (check == "0"){
             // 권한 있을 때 동작
@@ -59,8 +59,15 @@ class SplashActivity : AppCompatActivity() {
             OnCheckPermission()
         }
 
+//        OnCheckPermission()
 
-        
+//        Handler().postDelayed({
+//            val intent = Intent(this, MainActivity::class.java)
+//            startActivity(intent)
+//            finish()
+//        }, 2000)
+
+
 
     }
 
