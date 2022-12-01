@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.RecyclerView
 import com.example.ev_check.fragment.MapFragment
 import net.daum.mf.map.api.MapPoint
@@ -46,6 +47,9 @@ class SearchViewAdapter(var evstation: ArrayList<EvStation>, var con: MapFragmen
 
                 // 리스트 클릭시 해당 위치로 시점 이동
                 con.mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(evStation.lat.toDouble(), evStation.lng.toDouble()),1,true)
+
+                // 리사이클러뷰 닫기
+                con.binding.svView.isInvisible = true
 
             }
         }
