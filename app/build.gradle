@@ -72,6 +72,10 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation files('libs/libDaumMapAndroid.jar')
 
+    // 슬라이딩 패널
     implementation 'com.github.hannesa2:AndroidSlidingUpPanel:4.2.1'
+
+    // 스플래시 액티비티 gif
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.19'
 
 }

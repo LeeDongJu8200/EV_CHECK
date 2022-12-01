@@ -30,11 +30,13 @@ class SearchViewAdapter(var evstation: ArrayList<EvStation>, var con: MapFragmen
         var imgPin: ImageView
         var tvStatNmForListView: TextView
         var tvAddrForListView: TextView
+        var tvDistance: TextView
 
         init {
             imgPin = itemView.findViewById(R.id.imgPin)
             tvStatNmForListView = itemView.findViewById(R.id.tvStatNmForListView)
             tvAddrForListView = itemView.findViewById(R.id.tvAddrForListView)
+            tvDistance = itemView.findViewById(R.id.tvDistance)
 
             // 리스트 아이템 클릭 이벤트 리스너
             itemView.setOnClickListener {
@@ -44,6 +46,7 @@ class SearchViewAdapter(var evstation: ArrayList<EvStation>, var con: MapFragmen
                 Log.d(TAG, evStation.addr)
                 Log.d(TAG, evStation.lat)
                 Log.d(TAG, evStation.lng)
+                Log.d(TAG, evStation.distance)
 
                 // 리스트 클릭시 해당 위치로 시점 이동
                 con.mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(evStation.lat.toDouble(), evStation.lng.toDouble()),1,true)
@@ -75,6 +78,7 @@ class SearchViewAdapter(var evstation: ArrayList<EvStation>, var con: MapFragmen
         // 이미지 작업의 경우 glide를 사용해 server의 image를 불러올 수 있음
         holder.tvStatNmForListView.text = evStation.statNm
         holder.tvAddrForListView.text = evStation.addr
+        holder.tvDistance.text = evStation.distance
     }
 
     override fun getItemCount(): Int {

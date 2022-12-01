@@ -65,6 +65,7 @@ class MainActivity : AppCompatActivity() {
                         R.id.fl, // fragment를 넣을 곳
                         MapFragment() // 넣을 fragment
                     ).commit() // 커밋 필수!!!
+
                 }
 
 

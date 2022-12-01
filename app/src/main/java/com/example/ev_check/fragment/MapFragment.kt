@@ -19,10 +19,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isInvisible
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.ev_check.EvStation
-import com.example.ev_check.MainActivity
+import com.example.ev_check.*
 import com.example.ev_check.R
-import com.example.ev_check.SearchViewAdapter
 import com.example.ev_check.databinding.FragmentMapBinding
 import com.google.android.gms.location.*
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
@@ -76,14 +74,17 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
     // ** 초기 카메라 이동용 인공사 위치 코드 - 멘토링 필요!!!
     // 임시로 인공사 위경도값을 직접 받아서 쏘고 있으나 앱 실행과 동시에 위경도 값을 받아오는 방법이 필요함
     // 현재 아래쪽에 주석처리해 놓은 것들은 실시간 처리는 되는데 앱 실행 1~2초 후 작동.
-    var conlat: Double = 35.1467267
-    var conlng: Double = 126.922157
+    var curlat: Double = 35.1467267
+    var curlng: Double = 126.922157
 
     // 마커 표시 정보 그룹핑 변수
     lateinit var hashStatNm : List<String>
     lateinit var hashAddr : List<String>
     lateinit var hashLat : List<String>
     lateinit var hashLng : List<String>
+    // 거리
+    var hashDistance = mutableListOf<String>()
+    lateinit var distance : String
 
 //    lateinit var hashChgerType: Collection<List<String>>
 //    lateinit var hashStat: Collection<List<String>>
@@ -93,6 +94,8 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
 //    lateinit var hashBusiCall : Collection<List<String>>
 //    lateinit var hashParkingFree : Collection<List<String>>
 //    lateinit var hashNote : Collection<List<String>>
+
+
 
     // 서치뷰 관련 전역변수
     lateinit var searchViewAdapter: SearchViewAdapter
@@ -116,7 +119,7 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
         slidePanel.addPanelSlideListener(PanelEventListener())
 
         // 맵뷰 초기화
-//        binding.mapViewContainer.removeAllViews()
+        binding.mapViewContainer.removeAllViews()
         mapView = MapView(requireContext())
 
         // 맵뷰 이벤트 리스너
@@ -141,13 +144,26 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
         binding.mapViewContainer.addView(mapView)
         
         // 실시간 위치 업데이트
-//        startLocationUpdates()
+        startLocationUpdates()
+
+        var t: Double = 0.0
+        var g: Double = 0.0
+
+        try {
+//            t = MyApplication.preferences.getString("conlat", "").toDouble()
+//            g = MyApplication.preferences.getString("conlng", "").toDouble()
+        } catch (e: Exception){
+
+        }
         
         // 앱 시작과 동시에 초기위치로 카메라 이동 + 줌인
-        mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(conlat,conlng),1,false)
+        if (t == 0.0){
+            mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(curlat,curlng),1,false)
+        } else {
+            mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(t,g),1,false)
+        }
 
         // 앱 시작시 위치 추적
-        // 기본값 : 지도 이동 X
         mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving
 
 
@@ -181,6 +197,13 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
         hashLat = lat.distinct()
         hashLng = lng.distinct()
 
+        // 거리 체크용 임시코드, 수정필요
+        for (i in 0..hashStatNm.size-1){
+            getDistance(hashLat[i].toDouble(), hashLng[i].toDouble())
+            hashDistance.add(distance)
+        }
+
+
 //        hashChgerType = chgerType.groupBy { it.split("@")[0] }.values
 //        hashStat = stat.groupBy { it.split("@")[0] }.values
 //        hashUseTime = useTime.groupBy { it.split("@")[0] }.values
@@ -188,6 +211,7 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
 //        hashBusiNm = busiNm.groupBy { it.split("@")[0] }.values
 //        hashBusiCall = busiCall.groupBy { it.split("@")[0] }.values
 //        hashParkingFree = parkingFree.groupBy { it.split("@")[0] }.values
+//        hashNote = note.groupBy { it.split("@")[0] }.values
 //        hashNote = note.groupBy { it.split("@")[0] }.values
 
 
@@ -210,26 +234,28 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
 
         /* ----------- 이벤트 영역 ----------- */
 
-        // btnDirectionTracking : 방향추적 버튼
+        // btnDirectionTracking : 내 위치로 이동
         binding.btnDirectionTracking.setOnClickListener {
 
-            if (isCheck){ // 기본값 : 맵 고정이 꺼져 있을 때
-                // 방향 추적기능 켜기
-                mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
-                mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading
-                mapView.setZoomLevel(1, true) // 줌레벨 변경 이벤트
-                // binding.btnDirectionTracking.setBackgroundResource(R.drawable.ic_gps_clicked) // **버튼 이미지 변경 이벤트, 멘토링 필요
+//            if (isCheck){ // 기본값 : 맵 고정이 꺼져 있을 때
+//                // 방향 추적기능 켜기
+//                mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
+//                mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading
+//                mapView.setZoomLevel(1, true) // 줌레벨 변경 이벤트
+//                // binding.btnDirectionTracking.setBackgroundResource(R.drawable.ic_gps_clicked) // **버튼 이미지 변경 이벤트, 멘토링 필요
+//
+//            }else{
+//                mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
+//                mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving
+//                mapView.setZoomLevel(1, true)
+//                // binding.btnDirectionTracking.setBackgroundResource(R.drawable.ic_gps_normal)
+//
+//            }
+//
+//            // 토글 전환
+//            isCheck = !isCheck
 
-            }else{
-                mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
-                mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving
-                mapView.setZoomLevel(1, true)
-                // binding.btnDirectionTracking.setBackgroundResource(R.drawable.ic_gps_normal)
-
-            }
-
-            // 토글 전환
-            isCheck = !isCheck
+            mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(curlat,curlng),1,true)
 
         }
 
@@ -238,15 +264,25 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
             Toast.makeText(context, "고장신고가 완료되었습니다.", Toast.LENGTH_SHORT).show()
         }
 
+        var check = false
+
         binding.btnBookMark.setOnClickListener {
-            Toast.makeText(context, "북마크", Toast.LENGTH_SHORT).show()
+            if (check == false){
+                binding.btnBookMark.setImageResource(R.drawable.slideicon_bookmark_o)
+                check = !check
+                Toast.makeText(context, "즐겨찾기 등록!", Toast.LENGTH_SHORT).show()
+            } else {
+                binding.btnBookMark.setImageResource(R.drawable.slideicon_bookmark_x)
+                check = !check
+                Toast.makeText(context, "즐겨찾기 해제", Toast.LENGTH_SHORT).show()
+            }
         }
 
         // 임시버튼할당!!!!
         binding.imgSlow.setOnClickListener {
             // 카카오 네비 URL scheme
 //            val url = "kakaomap://route?sp="+conlat+","+"conlng+&ep="+mLat+","+mLng+"&by=CAR" // 왜 현재위치까지 찍히는지 몰?루
-            val url = "kakaomap://route?sp="+conlat+","+conlng+"&ep="+mLat+","+mLng+"&by=CAR"
+            val url = "kakaomap://route?sp="+curlat+","+curlng+"&ep="+mLat+","+mLng+"&by=CAR"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
 
 //            // 인텐트 카테고리 브라우저를 사용해 설치된 앱 검색
@@ -352,6 +388,23 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
 
     /* ----------- 함수, 메서드, 리스너, 기타기능 영역 ----------- */
 
+    fun getDistance(lat: Double, lon: Double): String? {
+        val locationA = Location("current")
+        locationA.latitude = curlat
+        locationA.longitude = curlng
+        val locationB = Location("target")
+        locationB.latitude = lat
+        locationB.longitude = lon
+        val dis = locationA.distanceTo(locationB).toDouble()
+        if (dis < 1000) {
+            distance = "" + dis.toInt() + " m"
+        } else {
+            distance = "" + dis.toInt() / 10 * 10 / 1000.0 + " km"
+        }
+        Log.d("거리", distance)
+        return distance
+    }
+
 
     /* ----------- Rest API ----------- */
 
@@ -413,6 +466,7 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
 
 
     /* ----------- 슬라이딩 패널 ----------- */
+
     // 슬라이딩 패널 이벤트 리스너
     inner class PanelEventListener : SlidingUpPanelLayout.PanelSlideListener {
         // 패널이 슬라이드 중일 때
@@ -432,6 +486,7 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
 
 
     /* ----------- 마커 클릭 ----------- */
+
     // 마커 클릭 이벤트 리스너
     class MarkerEventListener(val context: MapFragment): MapView.POIItemEventListener {
         override fun onPOIItemSelected(mapView: MapView?, poiItem: MapPOIItem?) {
@@ -599,48 +654,49 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
 
 
 
-//    // 실시간 위치 갱신 함수
-//    private fun startLocationUpdates() {
-//        // 권한 체크
-//        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-//            && ContextCompat.checkSelfPermission(requireContext(),Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//            return
-//        }
-//
-//        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
-//
-//        mFusedLocationProviderClient!!.lastLocation
-//            .addOnSuccessListener { mLastLocation->
-//                if(mLastLocation == null) {
-////                    Log.e("TAG", "location get fail")
-//                } else {
-////                    Log.d("TAG", "${mLastLocation.latitude} , ${mLastLocation.longitude}")
-//                }
-//            }
-//            .addOnFailureListener {
-//                Log.e("TAG", "location error is ${it.message}")
-//                it.printStackTrace()
-//            }
-//
-//        mLocationRequest = LocationRequest.create()
-//        mLocationRequest.run {
-//            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-//            interval = 1000 // 갱신주기
-//        }
-//
-//        mLocationCallback = object: LocationCallback() {
-//            override fun onLocationResult(locationResult: LocationResult) {
-//                locationResult?.let {
-//                    for((i, location) in it.locations.withIndex()) {
-//                        conlat = location.latitude
-//                        conlng = location.longitude
-////                        Log.d("현재좌표", "#$i ${location.latitude} , ${location.longitude}")
-//                    }
-//                }
-//            }
-//        }
-//        mFusedLocationProviderClient!!.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper())
-//    }
+    // 실시간 위치 갱신 함수
+    private fun startLocationUpdates() {
+        // 권한 체크
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+            && ContextCompat.checkSelfPermission(requireContext(),Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return
+        }
+
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
+
+        mFusedLocationProviderClient!!.lastLocation
+            .addOnSuccessListener { mLastLocation->
+                if(mLastLocation == null) {
+//                    Log.e("TAG", "location get fail")
+                } else {
+//                    Log.d("TAG", "${mLastLocation.latitude} , ${mLastLocation.longitude}")
+                }
+            }
+            .addOnFailureListener {
+                Log.e("TAG", "location error is ${it.message}")
+                it.printStackTrace()
+            }
+
+        mLocationRequest = LocationRequest.create()
+        mLocationRequest.run {
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            interval = 1000 // 갱신주기
+        }
+
+        mLocationCallback = object: LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                locationResult?.let {
+                    for((i, location) in it.locations.withIndex()) {
+                        curlat = location.latitude
+                        curlng = location.longitude
+                        Log.d("현재좌표", "#$i ${location.latitude} , ${location.longitude}")
+                    }
+                }
+            }
+        }
+        mFusedLocationProviderClient!!.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper())
+    }
+
 
     /* ----------- 서치뷰 ----------- */
 
@@ -673,7 +729,7 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
         var tempEv = ArrayList<EvStation>()
 
         for (i in 0..hashStatNm.size-1){
-            tempEv.add(EvStation(i, hashStatNm[i], hashAddr[i], hashLat[i], hashLng[i]))
+            tempEv.add(EvStation(i, hashStatNm[i], hashAddr[i], hashLat[i], hashLng[i], hashDistance[i]))
         }
 
 
@@ -704,15 +760,18 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
 
         } else {
             // 종료
+//            MyApplication.preferences.setString("conlat", conlat.toString())
+//            MyApplication.preferences.setString("conlng", conlng.toString())
             activity?.finish()
         }
     }
 
 
    // onPause : 다른 Activity 활성화시 호출
-   override fun onPause() {
+
+    override fun onPause() {
         super.onPause()
-        mFusedLocationProviderClient?.removeLocationUpdates(mLocationCallback)
+//        mFusedLocationProviderClient?.removeLocationUpdates(mLocationCallback)
         binding.mapViewContainer.removeAllViews()
     }
 
