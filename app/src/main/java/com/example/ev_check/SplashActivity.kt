@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
+import android.util.Log
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
@@ -39,23 +40,32 @@ class SplashActivity : AppCompatActivity() {
 
         /* ----------- 이벤트 영역 ----------- */
 
-        // ** 권한 부여창 호출, 현재 동시구현이 어려워 멘토링 필요
-        // 권한이 없을 경우 권한창 호출한 후 예 누르면 메인 액티비로 이동,
-        // 권한이 있을 경우엔 그냥 3초 후 메인 액티비티 이동이 되었으면 하나 실패함
-        // IF문 등으로 구현했을 때
-        // 1. 권한창은 띄우는데 예 누르기 전에 3초 후 메인 액티비티로 이동
-        // 2. 권한창 띄우고 나서 예 눌러도 메인액티비티로 이동하지 않는 경우가 발생
-        OnCheckPermission()
+        Log.d("권한체크", ""+checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION))
 
-        // SplashActivity에서 IntroActivity로 3초 후 이동
-        // 3초지연 --> SubThread --> **Handler --> MainThread
-        Handler().postDelayed({
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            finish()
-        }, 3000)
+        // 권한체크용 임시변수
+        var check = ""+checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+
+        if (check == "0"){
+            // 권한 있을 때 동작
+            // SplashActivity에서 MainActivity로 3초 후 이동
+            // 3초지연 --> SubThread --> **Handler --> MainThread
+            Handler().postDelayed({
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+                finish()
+            }, 3000)
+        } else {
+            // 권한 없을 때 동작
+            OnCheckPermission()
+        }
+
+
+        
+
     }
 
+    /* ----------- 함수, 스레드 영역 ----------- */
+    
     // 권한 설정 체크
     private fun OnCheckPermission() {
         if (ActivityCompat.checkSelfPermission(
@@ -100,8 +110,18 @@ class SplashActivity : AppCompatActivity() {
         when (requestCode) {
             PERMISSIONS_REQUEST -> if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) { // 권한이 허용되었을 경우
                 Snackbar.make(splashPageLayout, "권한이 설정되었습니다", Snackbar.LENGTH_LONG).show()
+
+                // SplashActivity에서 MainActivity로 3초 후 이동
+                // 3초지연 --> SubThread --> **Handler --> MainThread
+                Handler().postDelayed({
+                    val intent = Intent(this, MainActivity::class.java)
+                    startActivity(intent)
+                    finish()
+                }, 2000)
+
             } else {
 
+                // 앱 정보 화면 이동용 스낵바
                 Snackbar.make(
                     splashPageLayout,
                     "앱 사용을 위해서는 권한 설정이 필요합니다.\n설정으로 이동하시겠습니까?",
@@ -110,11 +130,15 @@ class SplashActivity : AppCompatActivity() {
                     "OK"
                 ) { // 스낵바 OK 클릭시 실행작업
                     startActivity(
+                        // 앱 정보 화면으로 이동
                         Intent(
                             Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                             Uri.parse("package:" + BuildConfig.APPLICATION_ID)
                         )
                     )
+                    // 어플리케이션 종료
+                    finish()
+
                 }.show()
             }
         }

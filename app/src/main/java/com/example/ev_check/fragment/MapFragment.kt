@@ -1,8 +1,13 @@
 package com.example.ev_check.fragment
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.location.Location
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +15,7 @@ import android.view.ViewGroup
 import android.widget.SearchView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import androidx.core.view.isInvisible
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,9 +24,7 @@ import com.example.ev_check.MainActivity
 import com.example.ev_check.R
 import com.example.ev_check.SearchViewAdapter
 import com.example.ev_check.databinding.FragmentMapBinding
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.*
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import net.daum.mf.map.api.MapPOIItem
 import net.daum.mf.map.api.MapPoint
@@ -50,7 +54,10 @@ var busiCall = mutableListOf<String>() // 관리업체 전화번호
 var parkingFree = mutableListOf<String>() // 주차료무료 여부
 var note = mutableListOf<String>() // 충전소 안내
 
-//뒤로가기 연속 클릭 대기 시간
+var mLat:Double = 0.1 // 마커위도
+var mLng:Double = 0.1 // 마커경도
+
+// 뒤로가기 연속 클릭 대기 시간
 var mBackWait:Long = 0
 
 class MapFragment : Fragment(), MainActivity.onBackPressedListener {
@@ -69,8 +76,8 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
     // ** 초기 카메라 이동용 인공사 위치 코드 - 멘토링 필요!!!
     // 임시로 인공사 위경도값을 직접 받아서 쏘고 있으나 앱 실행과 동시에 위경도 값을 받아오는 방법이 필요함
     // 현재 아래쪽에 주석처리해 놓은 것들은 실시간 처리는 되는데 앱 실행 1~2초 후 작동.
-    var firstlat: Double = 35.1467267
-    var firstlon: Double = 126.922157
+    var conlat: Double = 35.1467267
+    var conlng: Double = 126.922157
 
     // 마커 표시 정보 그룹핑 변수
     lateinit var hashStatNm : List<String>
@@ -137,7 +144,7 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
 //        startLocationUpdates()
         
         // 앱 시작과 동시에 초기위치로 카메라 이동 + 줌인
-        mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(firstlat,firstlon),1,false)
+        mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(conlat,conlng),1,false)
 
         // 앱 시작시 위치 추적
         // 기본값 : 지도 이동 X
@@ -151,7 +158,7 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
         // 페이지번호
         val pageNo = "&pageNo=1"
         // 한 페이지 결과 수 (최소 10, 최대 9999)
-        val numOfRows ="&numOfRows=10"
+        val numOfRows ="&numOfRows=30"
         // 지역구분코드(행정구역코드 앞 2자리, 서울 11, 광주 29)
         // ** 멘토링 필요! 현재 위치 값을 기반으로 지역을 파악하는 방법이 필요함
         // 위경도 범위로 일일이 하드코딩해서 범위에 따라 지역코드를 분할하는 방법을 고려중인데 더 좋은 방법이 있는지 알고싶음
@@ -228,11 +235,42 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
 
         // 슬라이드 버튼 이벤트
         binding.btnReport.setOnClickListener {
-            Log.d("슬라이드버튼 이벤트1", "고장신고")
+            Toast.makeText(context, "고장신고가 완료되었습니다.", Toast.LENGTH_SHORT).show()
         }
 
         binding.btnBookMark.setOnClickListener {
-            Log.d("슬라이드버튼 이벤트2", "onCreateView: ")
+            Toast.makeText(context, "북마크", Toast.LENGTH_SHORT).show()
+        }
+
+        // 임시버튼할당!!!!
+        binding.imgSlow.setOnClickListener {
+            // 카카오 네비 URL scheme
+//            val url = "kakaomap://route?sp="+conlat+","+"conlng+&ep="+mLat+","+mLng+"&by=CAR" // 왜 현재위치까지 찍히는지 몰?루
+            val url = "kakaomap://route?sp="+conlat+","+conlng+"&ep="+mLat+","+mLng+"&by=CAR"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+
+//            // 인텐트 카테고리 브라우저를 사용해 설치된 앱 검색
+//            intent.addCategory(Intent.CATEGORY_BROWSABLE)
+//            val list = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
+//
+//            // 설치되어 있지 않다면
+//            if (list.isEmpty()) {
+//                // 마켓으로 이동
+//                this.startActivity(
+//                    Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=net.daum.android.map"))
+//                )
+//            }
+            // 카카오맵이 없을 때 동작용
+            try { // 카카오맵 실행
+                startActivity(intent)
+            } catch (e: Exception) {  // 만약 실행이 안된다면 (앱이 없다면)
+                // 카카오맵 설치 페이지로 이동
+                this.startActivity(
+                    Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=net.daum.android.map"))
+                )
+            }
+
+
         }
 
 
@@ -409,8 +447,8 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
             val mNote = note.groupBy { it.split("@")[0] }.values.toTypedArray()[poiItem?.tag!!.toInt()].toMutableList() // 특이사항
 
             // 지도 중앙 이동용 위경도
-            val mLat = context.hashLat[poiItem.tag].toDouble()
-            val mLng = context.hashLng[poiItem.tag].toDouble()
+            mLat = context.hashLat[poiItem.tag].toDouble()
+            mLng = context.hashLng[poiItem.tag].toDouble()
             mapView?.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(mLat, mLng),true)
 
             // 충전기 정보
@@ -594,8 +632,8 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
 //            override fun onLocationResult(locationResult: LocationResult) {
 //                locationResult?.let {
 //                    for((i, location) in it.locations.withIndex()) {
-//                        lat = location.latitude
-//                        lon = location.longitude
+//                        conlat = location.latitude
+//                        conlng = location.longitude
 ////                        Log.d("현재좌표", "#$i ${location.latitude} , ${location.longitude}")
 //                    }
 //                }
@@ -644,24 +682,25 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
 
     /* ----------- 기타 기능 ----------- */
 
-    // 뒤로가기 버튼
+    // 뒤로가기 버튼 - 추후 개선?
     override fun onBackPressed() {
+        val slidePanel = binding.mainFrameLayout
+        val state = slidePanel.panelState
         Log.d("백버튼", "뒤로가기")
 
         // 서치뷰 텍스트 초기화, 리사이클러뷰 가리기
         binding.svSearch.setQuery("", false)
         binding.svView.isInvisible = true
-//        // 슬라이드 패널이 열려 있을 경우 닫는 기능 구현
-//            if (state == SlidingUpPanelLayout.PanelState.EXPANDED) {
-//                slidePanel.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
-//
-//            }
+        // 슬라이드 패널이 열려 있을 경우 닫기
+        if (state == SlidingUpPanelLayout.PanelState.EXPANDED) {
+            slidePanel.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
+        }
 
         // 뒤로가기 2번 눌렀을때의 동작
         if (System.currentTimeMillis() - mBackWait >= 1000){
             // 1초 기다린 후 1초 안에 뒤로가기 2번 연속 클릭시 종료
             mBackWait = System.currentTimeMillis()
-            Toast.makeText(context, "뒤로가기 버튼을 한번 더 누르면 종료됩니다.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "뒤로가기 버튼을 연속으로 누르면 종료됩니다.", Toast.LENGTH_SHORT).show()
 
         } else {
             // 종료
@@ -669,7 +708,8 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
         }
     }
 
-    // onPause : 다른 Activity 활성화시 호출
+
+   // onPause : 다른 Activity 활성화시 호출
    override fun onPause() {
         super.onPause()
         mFusedLocationProviderClient?.removeLocationUpdates(mLocationCallback)
