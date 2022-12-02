@@ -51,7 +51,8 @@ class SearchViewAdapter(var evstation: ArrayList<EvStation>, var con: MapFragmen
                 // 리스트 클릭시 해당 위치로 시점 이동
                 con.mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(evStation.lat.toDouble(), evStation.lng.toDouble()),1,true)
 
-                // 리사이클러뷰 닫기
+                // 서치뷰 텍스트 초기화, 리사이클러뷰 가리기
+                con.binding.svSearch.setQuery("", false)
                 con.binding.svView.isInvisible = true
 
             }

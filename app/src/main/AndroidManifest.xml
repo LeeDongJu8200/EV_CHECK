@@ -20,6 +20,8 @@
         android:theme="@style/Theme.EV_CHECK"
         android:usesCleartextTraffic="true"
         android:launchMode="singleTop"
+        android:name=".MyApplication"
+        android:stopWithTask="false"
         tools:targetApi="31">
 
         <activity
