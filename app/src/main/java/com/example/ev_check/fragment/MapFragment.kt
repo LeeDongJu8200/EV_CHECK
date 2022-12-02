@@ -126,8 +126,10 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
         mapView.setPOIItemEventListener(eventListener)
 
 
-        // btnDirectionTracking 토글용 boolean 변수
+        // btnMyLocation 토글용 boolean 변수
         var isCheck = true
+        binding.btnMyLocation.bringToFront()
+
 
         // 서치뷰, 리사이클러뷰
         binding.svSearch.bringToFront() // 서치뷰를 지도 위로
@@ -150,8 +152,10 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
         var g: Double = 0.0
 
         try {
-//            t = MyApplication.preferences.getString("conlat", "").toDouble()
-//            g = MyApplication.preferences.getString("conlng", "").toDouble()
+            t = MyApplication.prefs.getString("curlat", "").toDouble()
+            g = MyApplication.prefs.getString("curlng", "").toDouble()
+            Log.d("저장", ""+t)
+            Log.d("저장", ""+g)
         } catch (e: Exception){
 
         }
@@ -160,7 +164,9 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
         if (t == 0.0){
             mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(curlat,curlng),1,false)
         } else {
-            mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(t,g),1,false)
+            curlat = t
+            curlng = g
+            mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(curlat,curlng),1,false)
         }
 
         // 앱 시작시 위치 추적
@@ -234,8 +240,8 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
 
         /* ----------- 이벤트 영역 ----------- */
 
-        // btnDirectionTracking : 내 위치로 이동
-        binding.btnDirectionTracking.setOnClickListener {
+        // btnMyLocation : 내 위치로 이동
+        binding.btnMyLocation.setOnClickListener {
 
 //            if (isCheck){ // 기본값 : 맵 고정이 꺼져 있을 때
 //                // 방향 추적기능 켜기
@@ -255,6 +261,8 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
 //            // 토글 전환
 //            isCheck = !isCheck
 
+            mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
+            mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving
             mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(curlat,curlng),1,true)
 
         }
@@ -760,8 +768,8 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
 
         } else {
             // 종료
-//            MyApplication.preferences.setString("conlat", conlat.toString())
-//            MyApplication.preferences.setString("conlng", conlng.toString())
+//            MyApplication.prefs.setString("curlat", curlat.toString())
+//            MyApplication.prefs.setString("curlng", curlng.toString())
             activity?.finish()
         }
     }
@@ -772,7 +780,13 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
     override fun onPause() {
         super.onPause()
 //        mFusedLocationProviderClient?.removeLocationUpdates(mLocationCallback)
-        binding.mapViewContainer.removeAllViews()
+//        binding.mapViewContainer.removeAllViews()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        MyApplication.prefs.setString("curlat", curlat.toString())
+        MyApplication.prefs.setString("curlng", curlng.toString())
     }
 
 
