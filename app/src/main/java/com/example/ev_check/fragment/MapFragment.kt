@@ -176,7 +176,7 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
         /* ----------- Rest API 영역 ----------- */
 
         // API key값 (인증키)
-        val key = "2680%2Bqf3cT4Io2pS%2BAP7WbASYKfnMEzIWIqJZpszpKjbA%2FSNZ9HbeR8Z40kl24TH4qAGbl4XnWt1xPqeM3Qylw%3D%3D"
+        val key = "*******************"
         // 페이지번호
         val pageNo = "&pageNo=1"
         // 한 페이지 결과 수 (최소 10, 최대 9999)
