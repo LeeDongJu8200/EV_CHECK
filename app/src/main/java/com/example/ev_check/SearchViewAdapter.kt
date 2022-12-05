@@ -18,7 +18,7 @@ class SearchViewAdapter(var evstation: ArrayList<EvStation>, var con: MapFragmen
     RecyclerView.Adapter<SearchViewAdapter.ViewHolder>(), Filterable {
 
     /* ----------- 전역변수 선언 영역 ----------- */
-    var TAG = "PhoneBookListAdapter" // logd 태그용
+    var TAG = "StationListAdapter" // logd 태그용
     
     var filteredEvstations = ArrayList<EvStation>() // 필터링
     var itemFilter = ItemFilter() // 아이템 필터
