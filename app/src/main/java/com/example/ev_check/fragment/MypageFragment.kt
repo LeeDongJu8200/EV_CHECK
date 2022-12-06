@@ -34,7 +34,7 @@ class MypageFragment : Fragment() {
         val button = view.findViewById<Button>(R.id.btnAPI)
 
         // key값
-        val key = "2680%2Bqf3cT4Io2pS%2BAP7WbASYKfnMEzIWIqJZpszpKjbA%2FSNZ9HbeR8Z40kl24TH4qAGbl4XnWt1xPqeM3Qylw%3D%3D"
+        val key = "*****************************"
 
         // 현재 페이지번호
         val pageNo = "&pageNo=1"
