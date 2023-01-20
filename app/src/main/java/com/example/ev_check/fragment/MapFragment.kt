@@ -71,9 +71,7 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
     internal lateinit var mLocationRequest: LocationRequest // 위치 정보 요청의 매개변수를 저장
     internal lateinit var mLocationCallback: LocationCallback
 
-    // ** 초기 카메라 이동용 인공사 위치 코드 - 멘토링 필요!!!
-    // 임시로 인공사 위경도값을 직접 받아서 쏘고 있으나 앱 실행과 동시에 위경도 값을 받아오는 방법이 필요함
-    // 현재 아래쪽에 주석처리해 놓은 것들은 실시간 처리는 되는데 앱 실행 1~2초 후 작동.
+
     var curlat: Double = 35.1467267
     var curlng: Double = 126.922157
 
@@ -108,7 +106,7 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
     ): View? {
 
         /* ----------- 변수 선언 및 초기화 영역 ----------- */
-        
+
         // 프래그먼트의 View 객체 inflate
         // 뷰 바인딩 사용
         binding = FragmentMapBinding.inflate(layoutInflater)
@@ -126,8 +124,10 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
         mapView.setPOIItemEventListener(eventListener)
 
 
-        // btnDirectionTracking 토글용 boolean 변수
+        // btnMyLocation 토글용 boolean 변수
         var isCheck = true
+        binding.btnMyLocation.bringToFront()
+
 
         // 서치뷰, 리사이클러뷰
         binding.svSearch.bringToFront() // 서치뷰를 지도 위로
@@ -142,7 +142,7 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
 
         // 카카오지도 표시
         binding.mapViewContainer.addView(mapView)
-        
+
         // 실시간 위치 업데이트
         startLocationUpdates()
 
@@ -150,17 +150,23 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
         var g: Double = 0.0
 
         try {
-//            t = MyApplication.preferences.getString("conlat", "").toDouble()
-//            g = MyApplication.preferences.getString("conlng", "").toDouble()
+            t = MyApplication.prefs.getString("curlat", "").toDouble()
+            g = MyApplication.prefs.getString("curlng", "").toDouble()
+            Log.d("저장", ""+t)
+            Log.d("저장", ""+g)
         } catch (e: Exception){
 
         }
-        
+
         // 앱 시작과 동시에 초기위치로 카메라 이동 + 줌인
         if (t == 0.0){
             mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(curlat,curlng),1,false)
         } else {
-            mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(t,g),1,false)
+            Log.d("TAG_LOCATION, 앱 실행시 위도", ""+t)
+            Log.d("TAG_LOCATION, 앱 실행시 경도", ""+g)
+            curlat = t
+            curlng = g
+            mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(curlat,curlng),1,false)
         }
 
         // 앱 시작시 위치 추적
@@ -223,19 +229,20 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
                 itemName = hashStatNm[i]
                 marker.tag = i
                 marker.mapPoint = MapPoint.mapPointWithGeoCoord(hashLat[i].toDouble(), hashLng[i].toDouble())
-                marker.markerType = MapPOIItem.MarkerType.BluePin // 기본으로 제공하는 BluePin 마커 모양.
-                marker.selectedMarkerType =
-                    MapPOIItem.MarkerType.RedPin // 마커를 클릭했을때, 기본으로 제공하는 RedPin 마커 모양.
+                marker.markerType = MapPOIItem.MarkerType.CustomImage
+                customImageResourceId = R.drawable.marker_normal
+                selectedMarkerType = MapPOIItem.MarkerType.CustomImage
+                customSelectedImageResourceId = R.drawable.marker_selected
+                isCustomImageAutoscale = true
             }
             mapView.addPOIItem(marker) // 맵뷰에 마커 생성
-
         }
 
 
         /* ----------- 이벤트 영역 ----------- */
 
-        // btnDirectionTracking : 내 위치로 이동
-        binding.btnDirectionTracking.setOnClickListener {
+        // btnMyLocation : 내 위치로 이동
+        binding.btnMyLocation.setOnClickListener {
 
 //            if (isCheck){ // 기본값 : 맵 고정이 꺼져 있을 때
 //                // 방향 추적기능 켜기
@@ -255,6 +262,8 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
 //            // 토글 전환
 //            isCheck = !isCheck
 
+            mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
+            mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving
             mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(curlat,curlng),1,true)
 
         }
@@ -657,8 +666,10 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
     // 실시간 위치 갱신 함수
     private fun startLocationUpdates() {
         // 권한 체크
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-            && ContextCompat.checkSelfPermission(requireContext(),Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+            && ContextCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return
         }
 
@@ -667,9 +678,9 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
         mFusedLocationProviderClient!!.lastLocation
             .addOnSuccessListener { mLastLocation->
                 if(mLastLocation == null) {
-//                    Log.e("TAG", "location get fail")
+                    Log.e("TAG", "location get fail")
                 } else {
-//                    Log.d("TAG", "${mLastLocation.latitude} , ${mLastLocation.longitude}")
+                    Log.d("TAG_LOCATION", "${mLastLocation.latitude} , ${mLastLocation.longitude}")
                 }
             }
             .addOnFailureListener {
@@ -760,19 +771,27 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
 
         } else {
             // 종료
-//            MyApplication.preferences.setString("conlat", conlat.toString())
-//            MyApplication.preferences.setString("conlng", conlng.toString())
+//            MyApplication.prefs.setString("curlat", curlat.toString())
+//            MyApplication.prefs.setString("curlng", curlng.toString())
             activity?.finish()
         }
     }
 
 
-   // onPause : 다른 Activity 활성화시 호출
+    // onPause : 다른 Activity 활성화시 호출
 
     override fun onPause() {
         super.onPause()
 //        mFusedLocationProviderClient?.removeLocationUpdates(mLocationCallback)
-        binding.mapViewContainer.removeAllViews()
+//        binding.mapViewContainer.removeAllViews()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        MyApplication.prefs.setString("curlat", curlat.toString())
+        MyApplication.prefs.setString("curlng", curlng.toString())
+        Log.d("TAG_LOCATION, 앱 종료시 위도", curlat.toString())
+        Log.d("TAG_LOCATION, 앱 종료시 경도", curlng.toString())
     }
 
 

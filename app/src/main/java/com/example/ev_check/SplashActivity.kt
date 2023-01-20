@@ -12,7 +12,6 @@ import android.util.Log
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
-import com.example.ev_check.auth.IntroActivity
 import com.google.android.material.snackbar.Snackbar
 
 class SplashActivity : AppCompatActivity() {

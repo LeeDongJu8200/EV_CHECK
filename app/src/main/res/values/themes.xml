@@ -17,4 +17,8 @@
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
     </style>
+
+    <!--TabLayout을 위해서 액션바가 없는 테마로 설정-->
+    <style name="Theme.KotlinExam" parent="Theme.MaterialComponents.Light.NoActionBar">
+    </style>
 </resources>

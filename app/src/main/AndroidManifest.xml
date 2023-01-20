@@ -2,10 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.ev_check">
-    <!-- 권한 설정 : 위치정보, 인터넷 -->
+    <!-- 파일에 쓰기, 읽기 퍼미션 설정 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- 권한 설정 : 위치정보, 인터넷 -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
@@ -15,15 +17,49 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:launchMode="singleTop"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.EV_CHECK"
         android:usesCleartextTraffic="true"
-        android:launchMode="singleTop"
+        android:name=".MyApplication"
+        android:stopWithTask="false"
         tools:targetApi="31">
 
+        <!-- 위 쪽에 2개 항목 추가해넣기 -->
+
         <activity
-            android:name=".auth.IntroActivity"
+            android:name=".activity.ContentAdmin"
+            android:exported="false" />
+        <activity
+            android:name=".activity.ContentCommunity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.WriteAdmin"
+            android:exported="false" />
+        <activity
+            android:name=".activity.WriteCommunity"
+            android:exported="true" />
+        <activity
+            android:name=".mypage.StatusActivity"
+            android:exported="false" />
+        <activity
+            android:name=".mypage.SettingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".mypage.FavoritesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".mypage.InformationCar_Activity"
+            android:exported="false" />
+        <activity
+            android:name=".mypage.LoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".mypage.PrivacyActivity"
+            android:exported="false" />
+        <activity
+            android:name=".mypage.VehicleActivity"
             android:exported="false" />
         <activity
             android:name=".SplashActivity"
@@ -36,7 +72,7 @@
         </activity>
         <activity
             android:name=".MainActivity"
-            android:exported="false" />
+            android:exported="true"></activity>
 
         <meta-data
             android:name="com.kakao.sdk.AppKey"

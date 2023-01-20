@@ -12,7 +12,7 @@
     <item
         android:id="@+id/tab3"
         android:icon="@drawable/navi_check"
-        android:title="checkboard" />
+        android:title="caradmin" />
     <item
         android:id="@+id/tab4"
         android:icon="@drawable/navi_mypage"

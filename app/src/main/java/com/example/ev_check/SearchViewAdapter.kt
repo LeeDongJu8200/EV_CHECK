@@ -49,7 +49,10 @@ class SearchViewAdapter(var evstation: ArrayList<EvStation>, var con: MapFragmen
                 Log.d(TAG, evStation.distance)
 
                 // 리스트 클릭시 해당 위치로 시점 이동
-                con.mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(evStation.lat.toDouble(), evStation.lng.toDouble()),1,true)
+                con.mapView.
+                setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(
+                    evStation.lat.toDouble(),
+                    evStation.lng.toDouble()),1,true)
 
                 // 리사이클러뷰 닫기
                 con.binding.svView.isInvisible = true
