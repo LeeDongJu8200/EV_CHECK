@@ -18,7 +18,7 @@ class SearchViewAdapter(var evstation: ArrayList<EvStation>, var con: MapFragmen
     RecyclerView.Adapter<SearchViewAdapter.ViewHolder>(), Filterable {
 
     /* ----------- 전역변수 선언 영역 ----------- */
-    var TAG = "PhoneBookListAdapter" // logd 태그용
+    var TAG = "StationListAdapter" // logd 태그용
     
     var filteredEvstations = ArrayList<EvStation>() // 필터링
     var itemFilter = ItemFilter() // 아이템 필터
@@ -54,7 +54,8 @@ class SearchViewAdapter(var evstation: ArrayList<EvStation>, var con: MapFragmen
                     evStation.lat.toDouble(),
                     evStation.lng.toDouble()),1,true)
 
-                // 리사이클러뷰 닫기
+                // 서치뷰 텍스트 초기화, 리사이클러뷰 가리기
+                con.binding.svSearch.setQuery("", false)
                 con.binding.svView.isInvisible = true
 
             }

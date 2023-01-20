@@ -1,99 +1,133 @@
 package com.example.ev_check.fragment
 
-import android.content.Intent
-import android.media.Image
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
+import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
-import com.example.ev_check.MainActivity
+import androidx.annotation.RequiresApi
 import com.example.ev_check.R
-import com.example.ev_check.mypage.*
-import com.google.firebase.auth.FirebaseAuth
-import com.squareup.picasso.Picasso
+import org.w3c.dom.Document
 
-class MypageFragment : Fragment(), MainActivity.onBackPressedListener {
+import org.w3c.dom.Element
+import org.w3c.dom.Node
+import org.w3c.dom.NodeList
+import javax.xml.parsers.DocumentBuilderFactory
 
-    private lateinit var auth: FirebaseAuth
+
+var text2 = ""
+
+class MypageFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        // Inflate the layout for this fragment
+        var view = inflater.inflate(R.layout.fragment_mypage, container, false)
 
-        auth = FirebaseAuth.getInstance()
+        var tv = view.findViewById<TextView>(R.id.tvAPI)
+        val button = view.findViewById<Button>(R.id.btnAPI)
 
-        val view = inflater.inflate(R.layout.fragment_mypage, container, false)
-        val tv_gauge = view.findViewById<TextView>(R.id.tv_gauge)
-        val tv_carname = view.findViewById<TextView>(R.id.tv_carname)
-        val tv_favorites_station = view.findViewById<TextView>(R.id.tv_favorites_station)
-        val tv_setting = view.findViewById<TextView>(R.id.tv_setting)
-        val img = view.findViewById<ImageView>(R.id.img)
-        val backwards = view.findViewById<ImageView>(R.id.img_backwards)
+        // key값
+        val key = "******************************"
 
-        var tvLoginBtn = view.findViewById<TextView>(R.id.tv_login)
+        // 현재 페이지번호
+        val pageNo = "&pageNo=1"
 
-        //뒤로가기 버튼 -> 메인페이지로 이동
-        backwards.setOnClickListener {
-            val intent = Intent(context, MainActivity::class.java)
-            startActivity(intent)
-        }
-        //로그인 했을때, 계정명, 이미지 가져오기
-        if (auth.currentUser != null) {
-            tvLoginBtn.setText(
-                auth.currentUser?.displayName + "  님")
-//                        auth.currentUser?.email + "\n" + auth.currentUser?.photoUrl
+        // 한 페이지 결과 수
+        val numOfRows ="&numOfRows=1"
 
-            Picasso.get().load(auth.currentUser?.photoUrl).into(img)
-            // 클릭하면 정보변경page로 이동.
-            tvLoginBtn.setOnClickListener {
-                val intent = Intent(context, PrivacyActivity::class.java)
-                startActivity(intent)
-                activity?.finish()
-            }
-        }else {
-            //로그인 안했을때, 클릭하면 로그인page로 이동.
-            tvLoginBtn.setOnClickListener {
-                val intent = Intent(context, LoginActivity::class.java)
-//                startActivityForResult(intent, 0)
-                startActivity(intent)
-                activity?.finish()
-            }
+        // 생태기간 갱신
+        val period = "&period=5"
+
+        // 지역구분코드
+        val zcode = "&zcode=29"
+
+        val url = "http://apis.data.go.kr/B552584/EvCharger/getChargerInfo?serviceKey="+key+pageNo+numOfRows+period+zcode
+        Log.d("TTT", url)
+
+        // 버튼을 누르면 쓰레드 동작
+        button.setOnClickListener {
+
+            // 쓰레드 생성
+            val thread = Thread(NetworkThread(url))
+            thread.start() // 쓰레드 시작
+            thread.join() // 멀티 작업 안되게 하려면 start 후 join 입력
+
+            // 쓰레드에서 가져온 api 정보 텍스트에 뿌려주기
+            tv.text = text2
+
         }
-        tv_gauge.setOnClickListener {
-            val intent = Intent(context, StatusActivity::class.java)
-            startActivityForResult(intent, 0)
-        }
-        tv_carname.setOnClickListener {
-            val intent = Intent(context, VehicleActivity::class.java)
-            startActivityForResult(intent, 0)
-        }
-        tv_favorites_station.setOnClickListener {
-            val intent = Intent(context, FavoritesActivity::class.java)
-            startActivityForResult(intent, 0)
-        }
-        tv_setting.setOnClickListener {
-            val intent = Intent(context, SettingActivity::class.java)
-            startActivityForResult(intent, 0)
-        }
+
         return view
     }
-    // 뒤로가기 버튼 - 추후 개선?
-    override fun onBackPressed() {
-        // 뒤로가기 2번 눌렀을때의 동작
-        if (System.currentTimeMillis() - mBackWait >= 1000){
-            // 1초 기다린 후 1초 안에 뒤로가기 2번 연속 클릭시 종료
-            mBackWait = System.currentTimeMillis()
-            Toast.makeText(context, "뒤로가기 버튼을 연속으로 누르면 종료됩니다.", Toast.LENGTH_SHORT).show()
-        } else {
-            // 종료
-//            MyApplication.prefs.setString("curlat", curlat.toString())
-//            MyApplication.prefs.setString("curlng", curlng.toString())
-            activity?.finish()
+
+    class NetworkThread(var url: String): Runnable {
+
+        @RequiresApi(Build.VERSION_CODES.N)
+        override fun run() {
+            try {
+                val xml : Document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(url)
+                Log.d("TTT2", url)
+
+                xml.documentElement.normalize()
+                Log.d("ttt", xml.toString())
+
+                //찾고자 하는 데이터가 어느 노드 아래에 있는지 확인
+                val list: NodeList = xml.getElementsByTagName("item")
+
+                //list.length-1 만큼 얻고자 하는 태그의 정보를 가져온다
+                for(i in 0..list.length-1){
+
+                    val n: Node = list.item(i)
+
+                    if(n.getNodeType() == Node.ELEMENT_NODE){
+
+                        val elem = n as Element
+                        val map = mutableMapOf<String,String>()
+
+                        for(j in 0..elem.attributes.length - 1) {
+                            map.putIfAbsent(elem.attributes.item(j).nodeName, elem.attributes.item(j).nodeValue)
+                        }
+
+                        text2 += "${i + 1}번 충전기 \n"
+                        text2 += "1. 충전소명 : ${elem.getElementsByTagName("statNm").item(0).textContent} \n"
+                        text2 += "2. 충전소ID : ${elem.getElementsByTagName("statId").item(0).textContent} \n"
+                        text2 += "3. 충전기ID : ${elem.getElementsByTagName("chgerId").item(0).textContent} \n"
+                        text2 += "4. 충전기타입 : ${elem.getElementsByTagName("chgerType").item(0).textContent} \n"
+                        text2 += "5. 소재지주소 : ${elem.getElementsByTagName("addr").item(0).textContent} \n"
+                        text2 += "6. 위도 : ${elem.getElementsByTagName("lat").item(0).textContent} \n"
+                        text2 += "7. 경도 : ${elem.getElementsByTagName("lng").item(0).textContent} \n"
+                        text2 += "8. 이용가능시간 : ${elem.getElementsByTagName("useTime").item(0).textContent} \n"
+                        text2 += "9. 기관ID : ${elem.getElementsByTagName("busiId").item(0).textContent} \n"
+                        text2 += "10. 운영기관명 : ${elem.getElementsByTagName("busiNm").item(0).textContent} \n"
+                        text2 += "11. 관리업체 전화번호 : ${elem.getElementsByTagName("busiCall").item(0).textContent} \n"
+                        text2 += "12. 충전기상태 : ${elem.getElementsByTagName("stat").item(0).textContent} \n"
+                        text2 += "13. 무료주차여부 : ${elem.getElementsByTagName("parkingFree").item(0).textContent} \n"
+                        text2 += "14. 충전소안내 : ${elem.getElementsByTagName("note").item(0).textContent} \n"
+
+                        println("=========${i+1}=========")
+                        println("1. 주소 : ${elem.getElementsByTagName("addr").item(0).textContent}")
+                        println("2. 이름 : ${elem.getElementsByTagName("statNm").item(0).textContent}")
+                        println("3. 위도 : ${elem.getElementsByTagName("lat").item(0).textContent}")
+                        println("4. 경도 : ${elem.getElementsByTagName("lng").item(0).textContent}")
+
+                    }
+                }
+
+
+
+
+            } catch (e: Exception) {
+                Log.d("TTT3", "오픈API"+e.toString())
+            }
         }
+
     }
+
 }

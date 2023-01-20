@@ -71,7 +71,9 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
     internal lateinit var mLocationRequest: LocationRequest // 위치 정보 요청의 매개변수를 저장
     internal lateinit var mLocationCallback: LocationCallback
 
-
+    // ** 초기 카메라 이동용 인공사 위치 코드 - 멘토링 필요!!!
+    // 임시로 인공사 위경도값을 직접 받아서 쏘고 있으나 앱 실행과 동시에 위경도 값을 받아오는 방법이 필요함
+    // 현재 아래쪽에 주석처리해 놓은 것들은 실시간 처리는 되는데 앱 실행 1~2초 후 작동.
     var curlat: Double = 35.1467267
     var curlng: Double = 126.922157
 
@@ -106,7 +108,7 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
     ): View? {
 
         /* ----------- 변수 선언 및 초기화 영역 ----------- */
-
+        
         // 프래그먼트의 View 객체 inflate
         // 뷰 바인딩 사용
         binding = FragmentMapBinding.inflate(layoutInflater)
@@ -142,7 +144,7 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
 
         // 카카오지도 표시
         binding.mapViewContainer.addView(mapView)
-
+        
         // 실시간 위치 업데이트
         startLocationUpdates()
 
@@ -157,13 +159,11 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
         } catch (e: Exception){
 
         }
-
+        
         // 앱 시작과 동시에 초기위치로 카메라 이동 + 줌인
         if (t == 0.0){
             mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(curlat,curlng),1,false)
         } else {
-            Log.d("TAG_LOCATION, 앱 실행시 위도", ""+t)
-            Log.d("TAG_LOCATION, 앱 실행시 경도", ""+g)
             curlat = t
             curlng = g
             mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(curlat,curlng),1,false)
@@ -176,7 +176,7 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
         /* ----------- Rest API 영역 ----------- */
 
         // API key값 (인증키)
-        val key = "2680%2Bqf3cT4Io2pS%2BAP7WbASYKfnMEzIWIqJZpszpKjbA%2FSNZ9HbeR8Z40kl24TH4qAGbl4XnWt1xPqeM3Qylw%3D%3D"
+        val key = "*******************"
         // 페이지번호
         val pageNo = "&pageNo=1"
         // 한 페이지 결과 수 (최소 10, 최대 9999)
@@ -229,13 +229,12 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
                 itemName = hashStatNm[i]
                 marker.tag = i
                 marker.mapPoint = MapPoint.mapPointWithGeoCoord(hashLat[i].toDouble(), hashLng[i].toDouble())
-                marker.markerType = MapPOIItem.MarkerType.CustomImage
-                customImageResourceId = R.drawable.marker_normal
-                selectedMarkerType = MapPOIItem.MarkerType.CustomImage
-                customSelectedImageResourceId = R.drawable.marker_selected
-                isCustomImageAutoscale = true
+                marker.markerType = MapPOIItem.MarkerType.BluePin // 기본으로 제공하는 BluePin 마커 모양.
+                marker.selectedMarkerType =
+                    MapPOIItem.MarkerType.RedPin // 마커를 클릭했을때, 기본으로 제공하는 RedPin 마커 모양.
             }
             mapView.addPOIItem(marker) // 맵뷰에 마커 생성
+
         }
 
 
@@ -666,10 +665,8 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
     // 실시간 위치 갱신 함수
     private fun startLocationUpdates() {
         // 권한 체크
-        if (ContextCompat.checkSelfPermission(requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-            && ContextCompat.checkSelfPermission(requireContext(),
-                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+            && ContextCompat.checkSelfPermission(requireContext(),Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return
         }
 
@@ -678,9 +675,9 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
         mFusedLocationProviderClient!!.lastLocation
             .addOnSuccessListener { mLastLocation->
                 if(mLastLocation == null) {
-                    Log.e("TAG", "location get fail")
+//                    Log.e("TAG", "location get fail")
                 } else {
-                    Log.d("TAG_LOCATION", "${mLastLocation.latitude} , ${mLastLocation.longitude}")
+//                    Log.d("TAG", "${mLastLocation.latitude} , ${mLastLocation.longitude}")
                 }
             }
             .addOnFailureListener {
@@ -778,7 +775,7 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
     }
 
 
-    // onPause : 다른 Activity 활성화시 호출
+   // onPause : 다른 Activity 활성화시 호출
 
     override fun onPause() {
         super.onPause()
@@ -790,8 +787,6 @@ class MapFragment : Fragment(), MainActivity.onBackPressedListener {
         super.onDestroy()
         MyApplication.prefs.setString("curlat", curlat.toString())
         MyApplication.prefs.setString("curlng", curlng.toString())
-        Log.d("TAG_LOCATION, 앱 종료시 위도", curlat.toString())
-        Log.d("TAG_LOCATION, 앱 종료시 경도", curlng.toString())
     }
 
 

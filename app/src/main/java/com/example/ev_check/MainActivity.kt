@@ -23,8 +23,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.app.FrameMetricsAggregator
-import com.example.ev_check.fragment.CarAdminFragment
-import com.example.ev_check.fragment.CommunityFragment
 import com.example.ev_check.fragment.MapFragment
 import com.example.ev_check.fragment.MypageFragment
 import com.google.android.gms.location.*
@@ -49,82 +47,36 @@ class MainActivity : AppCompatActivity() {
         /* ----------- 이벤트 영역 ----------- */
 
         // 처음 실행시 bnv에 MapFragment가 보이도록 설정
-        supportFragmentManager.beginTransaction().replace(R.id.fl, MapFragment(), "map").commit() // 커밋 필수!!!
+        supportFragmentManager.beginTransaction().replace(
+            R.id.fl, // fragment를 넣을 곳
+            MapFragment(),
+            "map"
+        ).commit() // 커밋 필수!!!
 
         // bnv(네비게이션 뷰) 클릭 이벤트
         bnv.setOnItemSelectedListener { item ->
             // item --> 내가 선택한 메뉴 정보
-            when (item.itemId){ // 선택된 tab에 따른 동작
-                // item이 어떤 id값을 가지고 있는지 판단!
+            when (item.itemId){ // item이 어떤 id값을 가지고 있는지 판단!
+
                 R.id.tab1 -> {
                     // tab1 선택시
-                    Toast.makeText(this, "Map 화면", Toast.LENGTH_SHORT).show()
                     if (supportFragmentManager.findFragmentByTag("map") != null){
                         // MapFragment가 존재할 경우, 보여준다.
                         supportFragmentManager.beginTransaction().show(supportFragmentManager.findFragmentByTag("map")!!).commit()
                     } else {
                         // MapFragment가 존재하지 않을 경우, 더해준다.
-                        supportFragmentManager.beginTransaction().add(R.id.fl, MapFragment(), "map").commit()
+                        supportFragmentManager.beginTransaction().add(R.id.fl, MapFragment()).commit()
                     }
                     // 다른 세 프래그먼트는 가려준다.
-                    if (supportFragmentManager.findFragmentByTag("community") != null){
-                        supportFragmentManager.beginTransaction().hide(supportFragmentManager.findFragmentByTag("community")!!).commit()
-                    }
-                    if (supportFragmentManager.findFragmentByTag("caradmin") != null){
-                        supportFragmentManager.beginTransaction().hide(supportFragmentManager.findFragmentByTag("caradmin")!!).commit()
-                    }
                     if (supportFragmentManager.findFragmentByTag("mypage") != null){
                         supportFragmentManager.beginTransaction().hide(supportFragmentManager.findFragmentByTag("mypage")!!).commit()
                     }
+
                 }
 
-                R.id.tab2 -> {
-                    // tab2 선택시
-                    Toast.makeText(this, "Community 화면", Toast.LENGTH_SHORT).show()
-                    if (supportFragmentManager.findFragmentByTag("community") != null){
-                        // CommunityFragment가 존재할 경우, 보여준다.
-                        supportFragmentManager.beginTransaction().show(supportFragmentManager.findFragmentByTag("community")!!).commit()
-                    } else {
-                        // CommunityFragment가 존재하지 않을 경우, 더해준다.
-                        supportFragmentManager.beginTransaction().add(R.id.fl, CommunityFragment(), "community").commit()
-                    }
-                    // 다른 세 프래그먼트는 가려준다.
-                    if (supportFragmentManager.findFragmentByTag("map") != null){
-                        supportFragmentManager.beginTransaction().hide(supportFragmentManager.findFragmentByTag("map")!!).commit()
-                    }
-                    if (supportFragmentManager.findFragmentByTag("caradmin") != null){
-                        supportFragmentManager.beginTransaction().hide(supportFragmentManager.findFragmentByTag("caradmin")!!).commit()
-                    }
-                    if (supportFragmentManager.findFragmentByTag("mypage") != null){
-                        supportFragmentManager.beginTransaction().hide(supportFragmentManager.findFragmentByTag("mypage")!!).commit()
-                    }
-                }
-
-                R.id.tab3 -> {
-                    // tab3 선택시
-                    Toast.makeText(this, "CarAdmin 화면", Toast.LENGTH_SHORT).show()
-                    if (supportFragmentManager.findFragmentByTag("caradmin") != null){
-                        // CarAdminFragment가 존재할 경우, 보여준다.
-                        supportFragmentManager.beginTransaction().show(supportFragmentManager.findFragmentByTag("caradmin")!!).commit()
-                    } else {
-                        // CarAdminFragment가 존재하지 않을 경우, 더해준다.
-                        supportFragmentManager.beginTransaction().add(R.id.fl, CarAdminFragment(), "caradmin").commit()
-                    }
-                    // 다른 세 프래그먼트는 가려준다.
-                    if (supportFragmentManager.findFragmentByTag("map") != null){
-                        supportFragmentManager.beginTransaction().hide(supportFragmentManager.findFragmentByTag("map")!!).commit()
-                    }
-                    if (supportFragmentManager.findFragmentByTag("community") != null){
-                        supportFragmentManager.beginTransaction().hide(supportFragmentManager.findFragmentByTag("community")!!).commit()
-                    }
-                    if (supportFragmentManager.findFragmentByTag("mypage") != null){
-                        supportFragmentManager.beginTransaction().hide(supportFragmentManager.findFragmentByTag("mypage")!!).commit()
-                    }
-                }
 
                 R.id.tab4 -> {
                     // tab4 선택시
-                    Toast.makeText(this, "Mypage 화면", Toast.LENGTH_SHORT).show()
                     if (supportFragmentManager.findFragmentByTag("mypage") != null){
                         // MypageFragment가 존재할 경우, 보여준다.
                         supportFragmentManager.beginTransaction().show(supportFragmentManager.findFragmentByTag("mypage")!!).commit()
@@ -136,23 +88,22 @@ class MainActivity : AppCompatActivity() {
                     if (supportFragmentManager.findFragmentByTag("map") != null){
                         supportFragmentManager.beginTransaction().hide(supportFragmentManager.findFragmentByTag("map")!!).commit()
                     }
-                    if (supportFragmentManager.findFragmentByTag("community") != null){
-                        supportFragmentManager.beginTransaction().hide(supportFragmentManager.findFragmentByTag("community")!!).commit()
-                    }
-                    if (supportFragmentManager.findFragmentByTag("caradmin") != null){
-                        supportFragmentManager.beginTransaction().hide(supportFragmentManager.findFragmentByTag("caradmin")!!).commit()
-                    }
                 }
+
             }
             // false : event 처리가 끝나지 않았다고 판단
             // true : event 종료를 감지해서 다른 버튼 클릭 가능
             true
         }
+
         /* ----------- 기타 영역 ----------- */
+
 
         /* ----------- 테스트 영역 (사용 후 삭제) ----------- */
 
+
     }
+
 
     /* ----------- 함수, 메서드, 기타기능 영역 ----------- */
 
@@ -173,6 +124,8 @@ class MainActivity : AppCompatActivity() {
         }
         return super.dispatchTouchEvent(ev)
     }
+
+
     // 뒤로가기 버튼용 함수
     // Listener역할을 할 Interface 생성
     interface onBackPressedListener {
@@ -189,4 +142,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+
+
+
+
+
 }
